@@ -29,3 +29,34 @@ export async function getSupabaseServerClient() {
     },
   })
 }
+
+// Service-role client: bypasses RLS for server-side administrative actions only.
+// Never expose this key to the browser. Keep it for server actions/APIs.
+export async function getSupabaseServiceRoleClient() {
+  const cookieStore = await cookies()
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase service role configuration is missing. Set SUPABASE_SERVICE_ROLE_KEY.")
+  }
+
+  return createServerClient(supabaseUrl, serviceRoleKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll()
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+        } catch {
+          // ignore in RSC
+        }
+      },
+    },
+  })
+}

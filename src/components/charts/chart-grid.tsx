@@ -94,13 +94,83 @@ function ChartCard({
         const parsed = await parseCSV(file)
         setData(parsed.rows)
       } catch (error) {
-        console.error("[v0] Failed to load chart data:", error)
+        console.error("Failed to load chart data:", error)
       } finally {
         setLoading(false)
       }
     }
     loadData()
   }, [chart.file.file_path, chart.file.file_name])
+
+  // Defensive: check for valid config and data
+  const xAxis = chart.chart_config?.xAxis;
+  const yAxis = chart.chart_config?.yAxis;
+  const isConfigValid = xAxis && yAxis && Array.isArray(data) && data.length > 0;
+
+  let chartElement: React.ReactElement | null = null;
+  if (isConfigValid) {
+    switch (chart.chart_type) {
+      case "bar":
+        chartElement = (
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xAxis} />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey={yAxis} fill="#8884d8" />
+          </BarChart>
+        );
+        break;
+      case "line":
+        chartElement = (
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xAxis} />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey={yAxis} stroke="#8884d8" />
+          </LineChart>
+        );
+        break;
+      case "area":
+        chartElement = (
+          <AreaChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xAxis} />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Area type="monotone" dataKey={yAxis} stroke="#8884d8" fill="#8884d8" />
+          </AreaChart>
+        );
+        break;
+      case "pie":
+        chartElement = (
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey={yAxis}
+              nameKey={xAxis}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              label
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        );
+        break;
+      default:
+        chartElement = null;
+    }
+  }
 
   return (
     <Card>
@@ -117,57 +187,13 @@ function ChartCard({
           <div className="h-64 flex items-center justify-center">
             <p className="text-muted-foreground">Loading chart...</p>
           </div>
+        ) : !isConfigValid ? (
+          <div className="h-64 flex items-center justify-center">
+            <p className="text-destructive">Invalid chart configuration or no data.</p>
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            {chart.chart_type === "bar" && (
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={chart.chart_config.xAxis} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey={chart.chart_config.yAxis} fill="#8884d8" />
-              </BarChart>
-            )}
-            {chart.chart_type === "line" && (
-              <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={chart.chart_config.xAxis} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey={chart.chart_config.yAxis} stroke="#8884d8" />
-              </LineChart>
-            )}
-            {chart.chart_type === "area" && (
-              <AreaChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={chart.chart_config.xAxis} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Area type="monotone" dataKey={chart.chart_config.yAxis} stroke="#8884d8" fill="#8884d8" />
-              </AreaChart>
-            )}
-            {chart.chart_type === "pie" && (
-              <PieChart>
-                <Pie
-                  data={data}
-                  dataKey={chart.chart_config.yAxis}
-                  nameKey={chart.chart_config.xAxis}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            )}
+            {chartElement as React.ReactElement}
           </ResponsiveContainer>
         )}
       </CardContent>

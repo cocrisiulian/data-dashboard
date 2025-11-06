@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/controls/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-export default async function DashboardDetailPage({ params }: { params: { id: string } }) {
+
+export default async function DashboardDetailPage(props: { params: { id: string } } | Promise<{ params: { id: string } }>) {
+  const resolved = props instanceof Promise ? await props : props;
+  const { params } = resolved;
   const [dashboard, files] = await Promise.all([getDashboard(params.id), getFiles()])
 
   return (

@@ -15,21 +15,18 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("theme") as Theme) || "light";
-    }
-    return "light";
-  });
+  // Force theme to always be dark
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.body.style.backgroundColor = theme === "dark" ? "#18181b" : "#f3f4f6";
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    document.documentElement.classList.add("dark");
+    document.body.style.backgroundColor = "#18181b";
+    localStorage.setItem("theme", "dark");
+  }, []);
 
+  // setTheme will not change theme, but keep API compatible
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme: "dark", setTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );

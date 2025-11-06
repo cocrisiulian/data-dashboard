@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error("[v0] Middleware: Supabase environment variables are missing")
+    console.error("Middleware: Supabase environment variables are missing")
     return supabaseResponse
   }
 
