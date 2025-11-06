@@ -7,6 +7,7 @@ import { upgradePlan } from "@/lib/actions/plans"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { Plan } from "@/lib/types/database"
+import { toast } from "@/hooks/use-toast"
 
 export function PricingCard({
   plan,
@@ -25,17 +26,27 @@ export function PricingCard({
     }
 
     if (plan.name === "Custom") {
-      alert("Please contact us for custom pricing")
+      toast({
+        title: "Custom plan",
+        description: "Please contact us to tailor a plan to your needs.",
+      })
       return
     }
 
     setLoading(true)
     try {
       await upgradePlan(plan.id)
-      alert(`Successfully upgraded to ${plan.name} plan!`)
+      toast({
+        title: "Plan updated",
+        description: `Successfully upgraded to ${plan.name} plan.`,
+      })
       router.refresh()
     } catch (error: any) {
-      alert(error.message)
+      toast({
+        title: "Upgrade failed",
+        description: error?.message ?? "Something went wrong while upgrading.",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }
@@ -56,15 +67,14 @@ export function PricingCard({
   }
 
   return (
-    <Card className={`relative ${isPro ? "border-primary shadow-lg scale-105" : ""}`}>
-      {isPro && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-          Most Popular
-        </div>
-      )}
+    <Card
+      className={`relative group flex h-full flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${
+        isPro ? "border-primary ring-1 ring-primary/40 shadow-lg bg-gradient-to-b from-primary/5 to-transparent" : "hover:border-foreground/20"
+      }`}
+    >
       <CardHeader>
-        <CardTitle className="text-2xl">{plan.name}</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl tracking-tight">{plan.name}</CardTitle>
+        <CardDescription className="text-sm">
           {plan.name === "Free" && "Perfect for getting started"}
           {plan.name === "Pro" && "For growing teams"}
           {plan.name === "Custom" && "Enterprise solutions"}
@@ -73,11 +83,14 @@ export function PricingCard({
       <CardContent className="space-y-6">
         <div>
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold">{plan.price === 0 ? "Free" : `$${plan.price.toFixed(0)}`}</span>
+            <span className={`font-bold ${isPro ? "text-5xl" : "text-4xl"}`}>
+              {plan.price === 0 ? "Free" : `$${plan.price.toFixed(0)}`}
+            </span>
             {plan.price > 0 && plan.name !== "Custom" && <span className="text-muted-foreground">/month</span>}
             {plan.name === "Custom" && <span className="text-muted-foreground">Contact us</span>}
           </div>
         </div>
+        <div className="h-px bg-border/70" />
         <ul className="space-y-3">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center gap-2">
@@ -87,7 +100,7 @@ export function PricingCard({
           ))}
         </ul>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         <Button
           className="w-full"
           variant={isPro ? "default" : "outline"}

@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+
 // Returns the session object (userId, email) or null
 export async function getSession() {
   const cookieStore = await cookies();
@@ -17,14 +19,13 @@ export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, '', { ...COOKIE_OPTIONS, maxAge: 0 });
 }
-// Returnează userul din sesiunea curentă (sau null)
+// Returns the user from the current session (or null)
 export async function getUserFromRequest() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   return getUserFromToken(token);
 }
-import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const COOKIE_NAME = "session";
@@ -33,7 +34,7 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
   path: "/",
-  maxAge: 60 * 60 * 24 * 7, // 7 zile
+  maxAge: 60 * 60 * 24 * 7, // 7 days
 };
 
 export function createSessionCookie(user: { id: string; email: string }) {

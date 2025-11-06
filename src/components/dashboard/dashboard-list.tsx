@@ -6,6 +6,18 @@ import { LayoutDashboard, Trash2, BarChart3 } from "lucide-react"
 import { deleteDashboard } from "@/lib/actions/dashboards"
 import { useState } from "react"
 import Link from "next/link"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/feedback/alert-dialog"
+import { toast } from "@/hooks/use-toast"
 
 type DashboardWithCharts = {
   id: string
@@ -19,13 +31,12 @@ export function DashboardList({ dashboards }: { dashboards: DashboardWithCharts[
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (dashboardId: string) => {
-    if (!confirm("Are you sure you want to delete this dashboard? All charts will be removed.")) return
-
     setDeleting(dashboardId)
     try {
       await deleteDashboard(dashboardId)
+      toast({ title: "Dashboard deleted", description: "The dashboard was removed successfully." })
     } catch (error: any) {
-      alert(error.message)
+      toast({ title: "Failed to delete", description: error.message || "Please try again.", variant: "destructive" })
     } finally {
       setDeleting(null)
     }
@@ -53,14 +64,25 @@ export function DashboardList({ dashboards }: { dashboards: DashboardWithCharts[
                 <CardTitle className="truncate">{dashboard.name}</CardTitle>
                 <CardDescription className="line-clamp-2">{dashboard.description || "No description"}</CardDescription>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleDelete(dashboard.id)}
-                disabled={deleting === dashboard.id}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" disabled={deleting === dashboard.id}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete dashboard?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. All charts inside this dashboard will be removed.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(dashboard.id)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardHeader>
           <CardContent>

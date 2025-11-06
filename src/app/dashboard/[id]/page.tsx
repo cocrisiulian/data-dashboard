@@ -8,10 +8,9 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 
-export default async function DashboardDetailPage(props: { params: { id: string } } | Promise<{ params: { id: string } }>) {
-  const resolved = props instanceof Promise ? await props : props;
-  const { params } = resolved;
-  const [dashboard, files] = await Promise.all([getDashboard(params.id), getFiles()])
+export default async function DashboardDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const [dashboard, files] = await Promise.all([getDashboard(id), getFiles()])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -35,7 +34,7 @@ export default async function DashboardDetailPage(props: { params: { id: string 
             <AddChartDialog dashboardId={dashboard.id} files={files} />
           </div>
 
-          <ChartGrid charts={dashboard.charts} />
+          <ChartGrid charts={dashboard.charts} dashboardId={dashboard.id} files={files} />
         </div>
       </main>
     </div>

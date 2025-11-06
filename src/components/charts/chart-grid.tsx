@@ -2,6 +2,18 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Button } from "@/components/ui/controls/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/feedback/alert-dialog"
+import { toast } from "@/hooks/use-toast"
 import { Trash2, BarChart3 } from "lucide-react"
 import { deleteChart } from "@/lib/actions/dashboards"
 import { useState, useEffect } from "react"
@@ -24,6 +36,8 @@ import {
 } from "recharts"
 import { parseCSV } from "@/lib/utils/csv-parser"
 import { getFileUrl } from "@/lib/actions/files"
+import type { File } from "@/lib/types/database"
+import { EditChartDialog } from "@/components/dashboard/edit-chart-dialog"
 
 type ChartWithFile = {
   id: string
@@ -39,17 +53,16 @@ type ChartWithFile = {
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
-export function ChartGrid({ charts }: { charts: ChartWithFile[] }) {
+export function ChartGrid({ charts, dashboardId, files }: { charts: ChartWithFile[]; dashboardId: string; files: File[] }) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (chartId: string) => {
-    if (!confirm("Are you sure you want to delete this chart?")) return
-
     setDeleting(chartId)
     try {
       await deleteChart(chartId)
+      toast({ title: "Chart deleted", description: "The chart was removed successfully." })
     } catch (error: any) {
-      alert(error.message)
+      toast({ title: "Failed to delete", description: error.message || "Please try again." , variant: "destructive" })
     } finally {
       setDeleting(null)
     }
@@ -70,7 +83,7 @@ export function ChartGrid({ charts }: { charts: ChartWithFile[] }) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {charts.map((chart) => (
-        <ChartCard key={chart.id} chart={chart} onDelete={handleDelete} deleting={deleting === chart.id} />
+        <ChartCard key={chart.id} chart={chart} onDelete={handleDelete} deleting={deleting === chart.id} dashboardId={dashboardId} files={files} />
       ))}
     </div>
   )
@@ -80,7 +93,9 @@ function ChartCard({
   chart,
   onDelete,
   deleting,
-}: { chart: ChartWithFile; onDelete: (id: string) => void; deleting: boolean }) {
+  dashboardId,
+  files,
+}: { chart: ChartWithFile; onDelete: (id: string) => void; deleting: boolean; dashboardId: string; files: File[] }) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -103,9 +118,19 @@ function ChartCard({
   }, [chart.file.file_path, chart.file.file_name])
 
   // Defensive: check for valid config and data
-  const xAxis = chart.chart_config?.xAxis;
-  const yAxis = chart.chart_config?.yAxis;
-  const isConfigValid = xAxis && yAxis && Array.isArray(data) && data.length > 0;
+  const xAxis = chart.chart_config?.xAxis as string | undefined
+  const yAxis = chart.chart_config?.yAxis as string | undefined
+  const headers = data && data.length > 0 ? Object.keys(data[0]) : []
+  const resolveKey = (key?: string) => {
+    if (!key) return undefined
+    const exact = headers.find((h) => h === key)
+    if (exact) return exact
+    const ci = headers.find((h) => h.toLowerCase().trim() === key.toLowerCase().trim())
+    return ci
+  }
+  const rx = resolveKey(xAxis)
+  const ry = resolveKey(yAxis)
+  const isConfigValid = !!rx && !!ry && Array.isArray(data) && data.length > 0
 
   let chartElement: React.ReactElement | null = null;
   if (isConfigValid) {
@@ -114,11 +139,11 @@ function ChartCard({
         chartElement = (
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={xAxis} />
+            <XAxis dataKey={rx} />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey={yAxis} fill="#8884d8" />
+            <Bar dataKey={ry} fill="#8884d8" />
           </BarChart>
         );
         break;
@@ -126,11 +151,11 @@ function ChartCard({
         chartElement = (
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={xAxis} />
+            <XAxis dataKey={rx} />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey={yAxis} stroke="#8884d8" />
+            <Line type="monotone" dataKey={ry} stroke="#8884d8" />
           </LineChart>
         );
         break;
@@ -138,11 +163,11 @@ function ChartCard({
         chartElement = (
           <AreaChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={xAxis} />
+            <XAxis dataKey={rx} />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Area type="monotone" dataKey={yAxis} stroke="#8884d8" fill="#8884d8" />
+            <Area type="monotone" dataKey={ry} stroke="#8884d8" fill="#8884d8" />
           </AreaChart>
         );
         break;
@@ -151,8 +176,8 @@ function ChartCard({
           <PieChart>
             <Pie
               data={data}
-              dataKey={yAxis}
-              nameKey={xAxis}
+              dataKey={ry}
+              nameKey={rx}
               cx="50%"
               cy="50%"
               outerRadius={80}
@@ -177,9 +202,28 @@ function ChartCard({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{chart.title}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(chart.id)} disabled={deleting}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <EditChartDialog dashboardId={dashboardId} chart={chart as any} files={files} />
+            <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" disabled={deleting}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete chart?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The chart will be permanently removed from this dashboard.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(chart.id)}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>

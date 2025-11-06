@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/controls/button"
 import { ArrowLeft, FileText } from "lucide-react"
 import Link from "next/link"
 
-export default async function FilePreviewPage({ params }: { params: { id: string } }) {
-  const { file, headers, rows, totalRows } = await getFilePreview(params.id)
+export default async function FilePreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const { file, headers, rows, totalRows } = await getFilePreview(id)
 
   return (
     <div className="min-h-screen flex flex-col">

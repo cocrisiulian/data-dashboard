@@ -5,6 +5,18 @@ import { Button } from "@/components/ui/controls/button"
 import { FileText, Trash2, Eye } from "lucide-react"
 import { deleteFile } from "@/lib/actions/files"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/feedback/alert-dialog"
+import { toast } from "@/hooks/use-toast"
 import type { File } from "@/lib/types/database"
 import Link from "next/link"
 
@@ -12,13 +24,12 @@ export function FileList({ files }: { files: File[] }) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (fileId: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) return
-
     setDeleting(fileId)
     try {
       await deleteFile(fileId)
+      toast({ title: "File deleted", description: "The file was removed successfully." })
     } catch (error: any) {
-      alert(error.message)
+      toast({ title: "Failed to delete", description: error.message || "Please try again.", variant: "destructive" })
     } finally {
       setDeleting(null)
     }
@@ -59,9 +70,25 @@ export function FileList({ files }: { files: File[] }) {
                     <Eye className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(file.id)} disabled={deleting === file.id}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" disabled={deleting === file.id}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete file?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. The file will be permanently removed from storage.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(file.id)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

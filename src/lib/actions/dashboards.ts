@@ -214,3 +214,47 @@ export async function deleteChart(chartId: string) {
 
   revalidatePath("/dashboard")
 }
+
+export async function updateChart(
+  chartId: string,
+  dashboardId: string,
+  updates: {
+    file_id: string
+    chart_type: ChartType
+    title: string
+    chart_config: any
+  },
+) {
+  const supabase = await getSupabaseServerClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("Unauthorized")
+  }
+
+  const { error } = await supabase
+    .from("charts")
+    .update({
+      file_id: updates.file_id,
+      chart_type: updates.chart_type,
+      title: updates.title,
+      chart_config: updates.chart_config,
+    })
+    .eq("id", chartId)
+
+  if (error) {
+    throw new Error(`Failed to update chart: ${error.message}`)
+  }
+
+  // Log the action
+  await supabase.from("usage_logs").insert({
+    user_id: user.id,
+    action: "chart_update",
+    details: { chart_id: chartId, dashboard_id: dashboardId, chart_type: updates.chart_type },
+  })
+
+  revalidatePath(`/dashboard/${dashboardId}`)
+}

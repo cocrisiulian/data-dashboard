@@ -9,16 +9,16 @@ export default async function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <DashboardNav />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold">Choose Your Plan</h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      <main className="flex-1 container mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto space-y-14">
+          <div className="text-center space-y-3">
+            <h1 className="text-5xl font-bold tracking-tight">Choose Your Plan</h1>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Select the perfect plan for your data visualization needs. Upgrade or downgrade at any time.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 items-start">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
             {plans.map((plan) => (
               <PricingCard key={plan.id} plan={plan} currentPlanId={user?.plan_id} isLoggedIn={!!user} />
             ))}
