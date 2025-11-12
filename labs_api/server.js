@@ -19,7 +19,10 @@ const fs = require('fs')
 const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
-const { createClient } = require('@supabase/supabase-js')
+
+// Routers (MVC)
+const plansRouter = require('./routes/plans')
+const dashboardsRouter = require('./routes/dashboards')
 
 // Load local env if present
 const envLocal = path.join(process.cwd(), '.env.local')
@@ -42,6 +45,10 @@ if (!SUPABASE_URL || !SUPABASE_ANON) {
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+
+// Mount our routers
+app.use('/labs/plans', plansRouter)
+app.use('/labs/dashboards', dashboardsRouter)
 
 function getClients() {
   const anon = createClient(SUPABASE_URL, SUPABASE_ANON)
