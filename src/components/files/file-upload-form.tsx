@@ -9,10 +9,10 @@ import { Label } from "@/components/ui/text/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 import { Upload, FileText } from "lucide-react"
-import { uploadFile } from "@/lib/actions/files"
 import { useRouter } from "next/navigation"
+import { api } from "@/lib/api/client"
 
-export function FileUploadForm({ onSuccess }: { onSuccess?: () => void }) {
+export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUploaded?: () => void; onUploadSuccess?: () => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -68,14 +68,13 @@ export function FileUploadForm({ onSuccess }: { onSuccess?: () => void }) {
     setError("")
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const uploadedFile = await uploadFile(formData)
+      const uploadedFile = await api.files.upload(file)
       setFile(null)
-      onSuccess?.()
+      onFileUploaded?.()
+      onUploadSuccess?.()
       router.push(`/files/${uploadedFile.id}`)
     } catch (err: any) {
-      setError(err.message || "Failed to upload file")
+      setError(err.response?.data?.message || err.message || "Failed to upload file")
     } finally {
       setLoading(false)
     }
