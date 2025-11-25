@@ -23,6 +23,11 @@ yarn-error.log*
 # uploads
 /labs_api/uploads/*
 !labs_api/uploads/.gitkeep
+!labs_api/uploads/README.md
+
+# temporary scripts
+labs_api/test-*.js
+labs_api/migrate-*.js
 
 # vercel
 .vercel
