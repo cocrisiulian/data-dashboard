@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/feedback/alert-dialog"
 import { toast } from "@/hooks/use-toast"
 import { Trash2, BarChart3 } from "lucide-react"
-import { deleteChart } from "@/lib/actions/dashboards"
+import { api } from "@/lib/api/client"
 import { useState, useEffect } from "react"
+import { parseCSV } from "@/lib/utils/csv-parser"
 import {
   BarChart,
   Bar,
@@ -34,8 +35,6 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts"
-import { parseCSV } from "@/lib/utils/csv-parser"
-import { getFileUrl } from "@/lib/actions/files"
 import type { File } from "@/lib/types/database"
 import { EditChartDialog } from "@/components/dashboard/edit-chart-dialog"
 
@@ -53,16 +52,19 @@ type ChartWithFile = {
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
-export function ChartGrid({ charts, dashboardId, files }: { charts: ChartWithFile[]; dashboardId: string; files: File[] }) {
+export function ChartGrid({ charts, dashboardId, files, onChartDeleted }: { charts: ChartWithFile[]; dashboardId: string; files: File[]; onChartDeleted?: () => void }) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (chartId: string) => {
     setDeleting(chartId)
     try {
-      await deleteChart(chartId)
+      await api.charts.delete(chartId)
       toast({ title: "Chart deleted", description: "The chart was removed successfully." })
+      if (onChartDeleted) {
+        onChartDeleted()
+      }
     } catch (error: any) {
-      toast({ title: "Failed to delete", description: error.message || "Please try again." , variant: "destructive" })
+      toast({ title: "Failed to delete", description: error.response?.data?.message || error.message || "Please try again." , variant: "destructive" })
     } finally {
       setDeleting(null)
     }
@@ -83,7 +85,15 @@ export function ChartGrid({ charts, dashboardId, files }: { charts: ChartWithFil
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {charts.map((chart) => (
-        <ChartCard key={chart.id} chart={chart} onDelete={handleDelete} deleting={deleting === chart.id} dashboardId={dashboardId} files={files} />
+        <ChartCard 
+          key={chart.id} 
+          chart={chart} 
+          onDelete={handleDelete} 
+          deleting={deleting === chart.id} 
+          dashboardId={dashboardId} 
+          files={files}
+          onChartUpdated={onChartDeleted}
+        />
       ))}
     </div>
   )
@@ -95,27 +105,67 @@ function ChartCard({
   deleting,
   dashboardId,
   files,
-}: { chart: ChartWithFile; onDelete: (id: string) => void; deleting: boolean; dashboardId: string; files: File[] }) {
+  onChartUpdated,
+}: { 
+  chart: ChartWithFile; 
+  onDelete: (id: string) => void; 
+  deleting: boolean; 
+  dashboardId: string; 
+  files: File[];
+  onChartUpdated?: () => void;
+}) {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [fileError, setFileError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
       try {
-        const url = await getFileUrl(chart.file.file_path)
-        const response = await fetch(url)
-        const blob = await response.blob()
-        const file = new File([blob], chart.file.file_name, { type: "text/csv" })
-        const parsed = await parseCSV(file)
-        setData(parsed.rows)
+        setFileError(null)
+        
+        // Use the new /api/files/:id/data endpoint
+        const token = localStorage.getItem('token')
+        if (!token) {
+          setFileError("Authentication required")
+          setData([])
+          setLoading(false)
+          return
+        }
+
+        const response = await fetch(`http://localhost:4000/api/files/${chart.file.id}/data`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        if (response.ok) {
+          const jsonData = await response.json()
+          if (jsonData.rows && jsonData.rows.length > 0) {
+            setData(jsonData.rows)
+          } else {
+            setFileError("Empty file")
+            setData([])
+          }
+        } else if (response.status === 404) {
+          setFileError(`File not found`)
+          setData([])
+        } else if (response.status === 401) {
+          setFileError("Unauthorized - please login again")
+          setData([])
+        } else {
+          setFileError(`Failed to load file (${response.status})`)
+          setData([])
+        }
       } catch (error) {
         console.error("Failed to load chart data:", error)
+        setFileError("Error loading file")
+        setData([])
       } finally {
         setLoading(false)
       }
     }
     loadData()
-  }, [chart.file.file_path, chart.file.file_name])
+  }, [chart.file.id])
 
   // Defensive: check for valid config and data
   const xAxis = chart.chart_config?.xAxis as string | undefined
@@ -203,7 +253,16 @@ function ChartCard({
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{chart.title}</CardTitle>
           <div className="flex items-center gap-1">
-            <EditChartDialog dashboardId={dashboardId} chart={chart as any} files={files} />
+            <EditChartDialog 
+              chart={{
+                id: chart.id,
+                title: chart.title,
+                chartType: chart.chart_type as any,
+                chartConfig: chart.chart_config,
+                fileId: chart.file.id
+              }} 
+              onChartUpdated={onChartUpdated}
+            />
             <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="ghost" size="sm" disabled={deleting}>
@@ -230,6 +289,11 @@ function ChartCard({
         {loading ? (
           <div className="h-64 flex items-center justify-center">
             <p className="text-muted-foreground">Loading chart...</p>
+          </div>
+        ) : fileError ? (
+          <div className="h-64 flex items-center justify-center flex-col gap-2">
+            <p className="text-destructive">{fileError}</p>
+            <p className="text-sm text-muted-foreground">The source file may have been deleted</p>
           </div>
         ) : !isConfigValid ? (
           <div className="h-64 flex items-center justify-center">

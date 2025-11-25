@@ -17,24 +17,82 @@ import { Input } from "@/components/ui/controls/input"
 import { Label } from "@/components/ui/text/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/controls/select"
 import { Plus } from "lucide-react"
-import { addChart } from "@/lib/actions/dashboards"
+import { api } from "@/lib/api/client"
 import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 import type { File, ChartType } from "@/lib/types/database"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { parseCSV, getNumericColumns, getCategoricalColumns } from "@/lib/utils/csv-parser"
 
-export function AddChartDialog({ dashboardId, files }: { dashboardId: string; files: File[] }) {
+export function AddChartDialog({ dashboardId, files, onChartAdded }: { dashboardId: string; files: File[]; onChartAdded?: () => void }) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState("")
   const [fileId, setFileId] = useState("")
   const [chartType, setChartType] = useState<ChartType>("bar")
-  const [xAxis, setXAxis] = useState("")
-  const [yAxis, setYAxis] = useState("")
-  const [headers, setHeaders] = useState<string[]>([])
-  const [numericHeaders, setNumericHeaders] = useState<string[]>([])
-  const [loadingHeaders, setLoadingHeaders] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [fileColumns, setFileColumns] = useState<string[]>([])
+  const [xAxis, setXAxis] = useState("")
+  const [yAxis, setYAxis] = useState("")
+
+  // Reset state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTitle("")
+      setFileId("")
+      setChartType("bar")
+      setError("")
+      setFileColumns([])
+      setXAxis("")
+      setYAxis("")
+    }
+  }, [open])
+
+  // Load file columns when a file is selected
+  useEffect(() => {
+    async function loadFileColumns() {
+      if (!fileId) {
+        setFileColumns([])
+        setXAxis("")
+        setYAxis("")
+        return
+      }
+
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.error('No authentication token')
+          setFileColumns([])
+          return
+        }
+
+        const response = await fetch(`http://localhost:4000/api/files/${fileId}/data`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        if (!response.ok) {
+          setFileColumns([])
+          return
+        }
+
+        const jsonData = await response.json()
+        if (jsonData.headers && jsonData.headers.length > 0) {
+          setFileColumns(jsonData.headers)
+          // Auto-select first two columns
+          if (jsonData.headers.length >= 2) {
+            setXAxis(jsonData.headers[0])
+            setYAxis(jsonData.headers[1])
+          } else if (jsonData.headers.length === 1) {
+            setXAxis(jsonData.headers[0])
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load file columns:", err)
+        setFileColumns([])
+      }
+    }
+
+    loadFileColumns()
+  }, [fileId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,61 +101,34 @@ export function AddChartDialog({ dashboardId, files }: { dashboardId: string; fi
 
     try {
       const chartConfig = {
-        xAxis,
-        yAxis,
+        xAxis: xAxis,
+        yAxis: yAxis
       }
-      await addChart(dashboardId, fileId, chartType, title, chartConfig)
+      
+      await api.charts.create({
+        dashboard_id: dashboardId,
+        file_id: fileId,
+        chart_type: chartType,
+        title,
+        chart_config: chartConfig
+      })
+      
       setOpen(false)
       setTitle("")
       setFileId("")
+      setChartType("bar")
       setXAxis("")
       setYAxis("")
+      
+      if (onChartAdded) {
+        onChartAdded()
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to add chart")
+      setError(err.response?.data?.message || err.message || "Failed to add chart")
     } finally {
       setLoading(false)
     }
   }
-
-  // When file changes, auto-detect headers and suggest columns
-  useEffect(() => {
-    async function loadHeaders() {
-      if (!fileId) {
-        setHeaders([])
-        setNumericHeaders([])
-        setXAxis("")
-        setYAxis("")
-        return
-      }
-      setLoadingHeaders(true)
-      try {
-        const file = files.find((f) => f.id === fileId)
-        if (!file) return
-        const supabase = getSupabaseBrowserClient()
-        const { data } = supabase.storage.from("files").getPublicUrl(file.file_path)
-        const res = await fetch(data.publicUrl)
-        const blob = await res.blob()
-        const csvFile = new File([blob], file.file_name, { type: "text/csv" })
-        const parsed = await parseCSV(csvFile)
-        setHeaders(parsed.headers)
-        setNumericHeaders(getNumericColumns(parsed))
-        // Try to auto-pick sensible defaults
-        const categorical = getCategoricalColumns(parsed)
-        if (!xAxis && categorical.length > 0) setXAxis(categorical[0])
-        if (!yAxis && getNumericColumns(parsed).length > 0) setYAxis(getNumericColumns(parsed)[0])
-      } catch (err) {
-        console.error("Failed to read file headers", err)
-        setHeaders([])
-        setNumericHeaders([])
-      } finally {
-        setLoadingHeaders(false)
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    loadHeaders()
-    // We only want to react to fileId change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileId])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -144,6 +175,49 @@ export function AddChartDialog({ dashboardId, files }: { dashboardId: string; fi
                 </SelectContent>
               </Select>
             </div>
+            
+            {fileId && fileColumns.length > 0 && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="xAxis">X-Axis Column</Label>
+                  <Select value={xAxis} onValueChange={setXAxis} required>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select X-axis column" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={5}>
+                      {fileColumns.map((col) => (
+                        <SelectItem key={col} value={col}>
+                          {col}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="yAxis">Y-Axis Column</Label>
+                  <Select value={yAxis} onValueChange={setYAxis} required>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Y-axis column" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={5}>
+                      {fileColumns.map((col) => (
+                        <SelectItem key={col} value={col}>
+                          {col}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+            
+            {fileId && fileColumns.length === 0 && (
+              <div className="text-sm text-muted-foreground">
+                Loading columns from selected file...
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="chartType">Chart Type</Label>
               <Select value={chartType} onValueChange={(value: string) => setChartType(value as ChartType)} required>
@@ -153,38 +227,8 @@ export function AddChartDialog({ dashboardId, files }: { dashboardId: string; fi
                 <SelectContent>
                   <SelectItem value="bar">Bar Chart</SelectItem>
                   <SelectItem value="line">Line Chart</SelectItem>
-                  <SelectItem value="pie">Pie Chart</SelectItem>
                   <SelectItem value="area">Area Chart</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="xAxis">X-Axis Column</Label>
-              <Select value={xAxis} onValueChange={setXAxis} disabled={!fileId || loadingHeaders} required>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={loadingHeaders ? "Loading columns..." : "Select column"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {headers.map((h) => (
-                    <SelectItem key={h} value={h}>
-                      {h}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="yAxis">Y-Axis Column</Label>
-              <Select value={yAxis} onValueChange={setYAxis} disabled={!fileId || loadingHeaders} required>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={loadingHeaders ? "Loading columns..." : "Select numeric column"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {(numericHeaders.length > 0 ? numericHeaders : headers).map((h) => (
-                    <SelectItem key={h} value={h}>
-                      {h}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="pie">Pie Chart</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,7 +237,7 @@ export function AddChartDialog({ dashboardId, files }: { dashboardId: string; fi
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || files.length === 0}>
+            <Button type="submit" disabled={loading || files.length === 0 || !fileId || (fileId && (!xAxis || !yAxis))}>
               {loading ? "Adding..." : "Add Chart"}
             </Button>
           </DialogFooter>

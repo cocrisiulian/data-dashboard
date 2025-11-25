@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Button } from "@/components/ui/controls/button"
 import { LayoutDashboard, Trash2, BarChart3 } from "lucide-react"
-import { deleteDashboard } from "@/lib/actions/dashboards"
+import { api } from "@/lib/api/client"
 import { useState } from "react"
 import Link from "next/link"
 import {
@@ -27,14 +27,21 @@ type DashboardWithCharts = {
   charts: { count: number }[]
 }
 
-export function DashboardList({ dashboards }: { dashboards: DashboardWithCharts[] }) {
+export function DashboardList({
+  dashboards,
+  onDashboardDeleted,
+}: {
+  dashboards: DashboardWithCharts[]
+  onDashboardDeleted?: () => void
+}) {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (dashboardId: string) => {
     setDeleting(dashboardId)
     try {
-      await deleteDashboard(dashboardId)
+      await api.dashboards.delete(dashboardId)
       toast({ title: "Dashboard deleted", description: "The dashboard was removed successfully." })
+      onDashboardDeleted?.()
     } catch (error: any) {
       toast({ title: "Failed to delete", description: error.message || "Please try again.", variant: "destructive" })
     } finally {

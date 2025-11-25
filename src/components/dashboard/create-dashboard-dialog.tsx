@@ -17,10 +17,10 @@ import { Input } from "@/components/ui/controls/input"
 import { Label } from "@/components/ui/text/label"
 import { Textarea } from "@/components/ui/controls/textarea"
 import { Plus } from "lucide-react"
-import { createDashboard } from "@/lib/actions/dashboards"
+import { api } from "@/lib/api/client"
 import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 
-export function CreateDashboardDialog() {
+export function CreateDashboardDialog({ onDashboardCreated }: { onDashboardCreated?: () => void }) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -33,10 +33,11 @@ export function CreateDashboardDialog() {
     setLoading(true)
 
     try {
-      await createDashboard(name, description)
+      await api.dashboards.create({ name, description })
       setOpen(false)
       setName("")
       setDescription("")
+      onDashboardCreated?.()
     } catch (err: any) {
       setError(err.message || "Failed to create dashboard")
     } finally {

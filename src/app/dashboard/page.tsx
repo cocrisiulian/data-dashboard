@@ -1,24 +1,56 @@
-import { getDashboards } from "@/lib/actions/dashboards"
+"use client"
+
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { DashboardList } from "@/components/dashboard/dashboard-list"
 import { CreateDashboardDialog } from "@/components/dashboard/create-dashboard-dialog"
-import { getCurrentUser } from "@/lib/actions/auth"
-import { redirect } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { api } from "@/lib/api/client"
+import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 
-export default async function DashboardPage() {
-  let user = null
-  let dashboards = []
+export default function DashboardPage() {
+  const { user, isLoading: authLoading } = useAuth()
+  const router = useRouter()
+  const [dashboards, setDashboards] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  try {
-    ;[dashboards, user] = await Promise.all([getDashboards(), getCurrentUser()])
-
-    // If no user, redirect to login
-    if (!user) {
-      redirect("/login")
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login")
+      return
     }
-  } catch (error) {
-    console.error("Dashboard page error:", error)
-    redirect("/login")
+
+    if (user) {
+      loadDashboards()
+    }
+  }, [user, authLoading, router])
+
+  const loadDashboards = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const data = await api.dashboards.getAll()
+      setDashboards(data)
+    } catch (error) {
+      console.error("Failed to load dashboards:", error)
+      setError(error instanceof Error ? error.message : "Failed to load dashboards")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
   }
 
   return (
@@ -31,13 +63,19 @@ export default async function DashboardPage() {
               <h1 className="text-3xl font-bold mb-2">My Dashboards</h1>
               <p className="text-muted-foreground">
                 {user?.plan?.name || "Free"} Plan: {dashboards.length} /{" "}
-                {user?.plan?.max_dashboards === -1 ? "Unlimited" : user?.plan?.max_dashboards || 1} dashboards
+                {user?.plan?.maxDashboards === -1 ? "Unlimited" : user?.plan?.maxDashboards || 1} dashboards
               </p>
             </div>
-            <CreateDashboardDialog />
+            <CreateDashboardDialog onDashboardCreated={loadDashboards} />
           </div>
 
-          <DashboardList dashboards={dashboards} />
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <DashboardList dashboards={dashboards} onDashboardDeleted={loadDashboards} />
         </div>
       </main>
     </div>
