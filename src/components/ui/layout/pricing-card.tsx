@@ -3,11 +3,13 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Button } from "@/components/ui/controls/button"
 import { Check } from "lucide-react"
-import { upgradePlan } from "@/lib/actions/plans"
+import { api } from "@/lib/api/client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
 import type { Plan } from "@/lib/types/database"
 import { toast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils/utils"
 
 export function PricingCard({
   plan,
@@ -15,9 +17,11 @@ export function PricingCard({
   isLoggedIn,
 }: { plan: Plan; currentPlanId?: string | null; isLoggedIn: boolean }) {
   const router = useRouter()
+  const { refreshUser, user } = useAuth()
   const [loading, setLoading] = useState(false)
   const isCurrentPlan = currentPlanId === plan.id
   const isPro = plan.name === "Pro"
+  const isCurrentUserPlan = user?.plan?.id === plan.id
 
   const handleUpgrade = async () => {
     if (!isLoggedIn) {
@@ -35,12 +39,23 @@ export function PricingCard({
 
     setLoading(true)
     try {
-      await upgradePlan(plan.id)
+      await api.auth.upgradePlan(plan.id)
+      
+      // Refresh user data FIRST to get updated plan limits
+      await refreshUser()
+      
       toast({
         title: "Plan updated",
-        description: `Successfully upgraded to ${plan.name} plan.`,
+        description: `Successfully upgraded to ${plan.name} plan. Your new limits are now active!`,
       })
+      
+      // Force full page reload to ensure all components use new limits
       router.refresh()
+      
+      // Redirect to dashboard to show new limits in action
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
     } catch (error: any) {
       toast({
         title: "Upgrade failed",
@@ -102,12 +117,12 @@ export function PricingCard({
       </CardContent>
       <CardFooter className="mt-auto">
         <Button
-          className="w-full"
+          className={cn("w-full", isPro && !isCurrentUserPlan && "border border-border")}
           variant={isPro ? "default" : "outline"}
           onClick={handleUpgrade}
-          disabled={isCurrentPlan || loading}
+          disabled={isCurrentUserPlan || loading}
         >
-          {isCurrentPlan ? "Current Plan" : loading ? "Processing..." : isLoggedIn ? "Upgrade" : "Get Started"}
+          {isCurrentUserPlan ? "Current Plan" : loading ? "Processing..." : isLoggedIn ? "Upgrade" : "Get Started"}
         </Button>
       </CardFooter>
     </Card>

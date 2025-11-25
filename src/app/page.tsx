@@ -1,10 +1,13 @@
+"use client"
+
 import { Button } from "@/components/ui/controls/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
-import { BarChart3, FileText, LayoutDashboard } from "lucide-react"
+import { BarChart3, FileText, LayoutDashboard, BookOpen } from "lucide-react"
 import Link from "next/link"
-import { getCurrentUser } from "@/lib/actions/auth"
-export default async function HomePage() {
-  const user = await getCurrentUser();
+import { useAuth } from "@/contexts/AuthContext"
+
+export default function HomePage() {
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -71,12 +74,36 @@ export default async function HomePage() {
               <Link href="/pricing" className="hover:text-foreground transition-colors">
                 Pricing
               </Link>
+              <Link href="/LABS" className="hover:text-foreground transition-colors flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                Labs
+              </Link>
               <Link href="/login" className="hover:text-foreground transition-colors">
                 Login
               </Link>
               <Link href="/register" className="hover:text-foreground transition-colors">
                 Sign Up
               </Link>
+            </div>
+          </div>
+          
+          {/* Labs CTA Section */}
+          <div className="mt-8 pt-8 border-t">
+            <div className="max-w-2xl mx-auto text-center space-y-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                <BookOpen className="h-4 w-4" />
+                Academic Project
+              </div>
+              <h3 className="text-2xl font-bold">PPAW Laboratory Work</h3>
+              <p className="text-muted-foreground">
+                Explore 7 interactive laboratories demonstrating web application architecture concepts
+              </p>
+              <Button asChild size="lg" className="mt-4">
+                <Link href="/LABS" className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  View All Labs
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
