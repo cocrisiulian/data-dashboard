@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================
+// MODELS (Code First Approach)
+// ===========================
+
+model Plan {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  maxFiles        Int      @map("max_files")
+  maxCharts       Int      @map("max_charts")
+  maxDashboards   Int      @map("max_dashboards")
+  price           Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  users           User[]
+
+  @@map("plans")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String    // hashed with bcrypt
+  fullName        String?   @map("full_name")
+  planId          String?   @map("plan_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  plan            Plan?     @relation(fields: [planId], references: [id])
+  dashboards      Dashboard[]
+  files           File[]
+  usageLogs       UsageLog[]
+
+  @@map("users")
+}
+
+model File {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  fileName        String   @map("file_name")
+  filePath        String   @map("file_path")
+  fileSize        Int      @map("file_size")
+  fileType        String   @map("file_type")
+  uploadedAt      DateTime @default(now()) @map("uploaded_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charts          Chart[]
+
+  @@index([userId])
+  @@map("files")
+}
+
+model Dashboard {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  name            String
+  description     String?  @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charts          Chart[]
+
+  @@index([userId])
+  @@map("dashboards")
+}
+
+model Chart {
+  id              String   @id @default(uuid())
+  dashboardId     String   @map("dashboard_id")
+  fileId          String   @map("file_id")
+  chartType       String   @map("chart_type")
+  chartConfig     Json     @map("chart_config")
+  title           String
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  dashboard       Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([dashboardId])
+  @@map("charts")
+}
+
+model UsageLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  action          String
+  details         Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("usage_logs")
+}
