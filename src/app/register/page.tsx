@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/controls/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Input } from "@/components/ui/controls/input"
@@ -20,10 +20,10 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { register } = useAuth()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = getSupabaseBrowserClient()
     setIsLoading(true)
     setError(null)
 
@@ -40,20 +40,9 @@ export default function RegisterPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-          data: {
-            full_name: fullName,
-          },
-        },
-      })
-      if (error) throw error
-
-      // Show success message
-      router.push("/register/success")
+      await register(email, password, fullName)
+      // Redirect directly to dashboard after successful registration
+      router.push("/dashboard")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/controls/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Input } from "@/components/ui/controls/input"
@@ -18,21 +18,16 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { login } = useAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = getSupabaseBrowserClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (error) throw error
+      await login(email, password)
       router.push("/dashboard")
-      router.refresh()
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
