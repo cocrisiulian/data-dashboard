@@ -346,19 +346,22 @@ const upgradePlan = async (req, res, next) => {
           where: { userId },
           select: {
             id: true,
-            filename: true,
-            originalName: true,
-            size: true,
-            createdAt: true
+            fileName: true,
+            fileSize: true,
+            uploadedAt: true
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { uploadedAt: 'desc' }
         }),
         prisma.chart.findMany({ 
-          where: { userId },
+          where: { 
+            dashboard: {
+              userId
+            }
+          },
           select: {
             id: true,
-            name: true,
-            type: true,
+            title: true,
+            chartType: true,
             createdAt: true
           },
           orderBy: { createdAt: 'desc' }

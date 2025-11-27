@@ -36,8 +36,8 @@ interface ResourceCleanupModalProps {
       dashboards: number
     }
     resources: {
-      files: Array<{ id: string; filename: string; originalName: string; size: number; createdAt: string }>
-      charts: Array<{ id: string; name: string; type: string; createdAt: string }>
+      files: Array<{ id: string; fileName: string; fileSize: number; uploadedAt: string }>
+      charts: Array<{ id: string; title: string; chartType: string; createdAt: string }>
       dashboards: Array<{ id: string; name: string; description?: string; _count: { charts: number }; createdAt: string }>
     }
   }
@@ -192,9 +192,9 @@ export function ResourceCleanupModal({
                         onCheckedChange={() => toggleFile(file.id)}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{file.originalName}</div>
+                        <div className="font-medium truncate">{file.fileName}</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatFileSize(file.size)} • {formatDate(file.createdAt)}
+                          {formatFileSize(file.fileSize)} • {formatDate(file.uploadedAt)}
                         </div>
                       </div>
                     </div>
@@ -224,9 +224,9 @@ export function ResourceCleanupModal({
                         onCheckedChange={() => toggleChart(chart.id)}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{chart.name}</div>
+                        <div className="font-medium truncate">{chart.title}</div>
                         <div className="text-sm text-muted-foreground">
-                          {chart.type} • {formatDate(chart.createdAt)}
+                          {chart.chartType} • {formatDate(chart.createdAt)}
                         </div>
                       </div>
                     </div>
