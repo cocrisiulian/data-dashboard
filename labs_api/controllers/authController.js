@@ -236,7 +236,7 @@ const logout = async (req, res, next) => {
  */
 const upgradePlan = async (req, res, next) => {
   try {
-    const { planId } = req.body
+    const { planId, deleteResources } = req.body
     const userId = req.user.id
 
     if (!planId) {
@@ -281,45 +281,136 @@ const upgradePlan = async (req, res, next) => {
       plan.maxDashboards < currentUser.plan.maxDashboards
     )
 
+    // If user provided resources to delete, delete them first
+    if (deleteResources && isDowngrade) {
+      const deletePromises = []
+      
+      // Delete selected files
+      if (deleteResources.fileIds && deleteResources.fileIds.length > 0) {
+        deletePromises.push(
+          prisma.file.deleteMany({
+            where: {
+              id: { in: deleteResources.fileIds },
+              userId // Ensure user owns these files
+            }
+          })
+        )
+      }
+      
+      // Delete selected charts
+      if (deleteResources.chartIds && deleteResources.chartIds.length > 0) {
+        deletePromises.push(
+          prisma.chart.deleteMany({
+            where: {
+              id: { in: deleteResources.chartIds },
+              userId // Ensure user owns these charts
+            }
+          })
+        )
+      }
+      
+      // Delete selected dashboards
+      if (deleteResources.dashboardIds && deleteResources.dashboardIds.length > 0) {
+        deletePromises.push(
+          prisma.dashboard.deleteMany({
+            where: {
+              id: { in: deleteResources.dashboardIds },
+              userId // Ensure user owns these dashboards
+            }
+          })
+        )
+      }
+
+      // Execute all deletions
+      await Promise.all(deletePromises)
+
+      // Log the cleanup
+      await prisma.usageLog.create({
+        data: {
+          userId,
+          action: 'plan_downgrade_cleanup',
+          details: {
+            deletedFiles: deleteResources.fileIds?.length || 0,
+            deletedCharts: deleteResources.chartIds?.length || 0,
+            deletedDashboards: deleteResources.dashboardIds?.length || 0,
+            targetPlan: plan.name
+          }
+        }
+      })
+    }
+
     if (isDowngrade) {
-      // Count current resources
-      const [filesCount, chartsCount, dashboardsCount] = await Promise.all([
-        prisma.file.count({ where: { userId } }),
-        prisma.chart.count({ where: { userId } }),
-        prisma.dashboard.count({ where: { userId } })
+      // Get all current resources with full details
+      const [files, charts, dashboards] = await Promise.all([
+        prisma.file.findMany({ 
+          where: { userId },
+          select: {
+            id: true,
+            filename: true,
+            originalName: true,
+            size: true,
+            createdAt: true
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        prisma.chart.findMany({ 
+          where: { userId },
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            createdAt: true
+          },
+          orderBy: { createdAt: 'desc' }
+        }),
+        prisma.dashboard.findMany({ 
+          where: { userId },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            createdAt: true,
+            _count: {
+              select: { charts: true }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        })
       ])
 
-      // Validate against new plan limits
-      const violations = []
-      
-      if (filesCount > plan.maxFiles) {
-        violations.push(`You have ${filesCount} files but the ${plan.name} plan allows only ${plan.maxFiles}`)
-      }
-      
-      if (chartsCount > plan.maxCharts) {
-        violations.push(`You have ${chartsCount} charts but the ${plan.name} plan allows only ${plan.maxCharts}`)
-      }
-      
-      if (dashboardsCount > plan.maxDashboards) {
-        violations.push(`You have ${dashboardsCount} dashboards but the ${plan.name} plan allows only ${plan.maxDashboards}`)
+      // Check which resources exceed new plan limits
+      const needsCleanup = {
+        files: files.length > plan.maxFiles,
+        charts: charts.length > plan.maxCharts,
+        dashboards: dashboards.length > plan.maxDashboards
       }
 
-      if (violations.length > 0) {
+      if (needsCleanup.files || needsCleanup.charts || needsCleanup.dashboards) {
         return res.status(400).json({
-          error: 'Plan downgrade blocked',
-          message: 'Cannot downgrade: you exceed the new plan limits',
-          violations,
+          error: 'Plan downgrade requires resource cleanup',
+          message: 'You need to select which resources to delete before downgrading',
+          requiresSelection: true,
           currentUsage: {
-            files: filesCount,
-            charts: chartsCount,
-            dashboards: dashboardsCount
+            files: files.length,
+            charts: charts.length,
+            dashboards: dashboards.length
           },
           newPlanLimits: {
             maxFiles: plan.maxFiles,
             maxCharts: plan.maxCharts,
             maxDashboards: plan.maxDashboards
           },
-          suggestion: 'Please delete some resources before downgrading your plan'
+          toDelete: {
+            files: needsCleanup.files ? files.length - plan.maxFiles : 0,
+            charts: needsCleanup.charts ? charts.length - plan.maxCharts : 0,
+            dashboards: needsCleanup.dashboards ? dashboards.length - plan.maxDashboards : 0
+          },
+          resources: {
+            files: needsCleanup.files ? files : [],
+            charts: needsCleanup.charts ? charts : [],
+            dashboards: needsCleanup.dashboards ? dashboards : []
+          },
+          instruction: 'Select the resources you want to delete, then call this endpoint again with deleteResources parameter'
         })
       }
     }
