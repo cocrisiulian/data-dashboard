@@ -339,9 +339,44 @@ const upgradePlan = async (req, res, next) => {
           }
         }
       })
-    }
+      
+      // Re-count resources after deletion to verify we're within limits
+      const [remainingFilesCount, remainingChartsCount, remainingDashboardsCount] = await Promise.all([
+        prisma.file.count({ where: { userId } }),
+        prisma.chart.count({ 
+          where: { 
+            dashboard: { userId }
+          }
+        }),
+        prisma.dashboard.count({ where: { userId } })
+      ])
 
-    if (isDowngrade) {
+      // Verify we're now within limits
+      if (
+        remainingFilesCount > plan.maxFiles ||
+        remainingChartsCount > plan.maxCharts ||
+        remainingDashboardsCount > plan.maxDashboards
+      ) {
+        return res.status(400).json({
+          error: 'Insufficient resources deleted',
+          message: 'You still have too many resources after cleanup',
+          currentUsage: {
+            files: remainingFilesCount,
+            charts: remainingChartsCount,
+            dashboards: remainingDashboardsCount
+          },
+          newPlanLimits: {
+            maxFiles: plan.maxFiles,
+            maxCharts: plan.maxCharts,
+            maxDashboards: plan.maxDashboards
+          }
+        })
+      }
+      
+      // Resources successfully cleaned up, proceed with downgrade
+      // Skip the resource check below since we already handled it
+    } else if (isDowngrade) {
+      // Only check resources if user hasn't deleted any yet
       // Get all current resources with full details
       const [files, charts, dashboards] = await Promise.all([
         prisma.file.findMany({ 
