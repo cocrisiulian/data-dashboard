@@ -3,6 +3,7 @@
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { DashboardList } from "@/components/dashboard/dashboard-list"
 import { CreateDashboardDialog } from "@/components/dashboard/create-dashboard-dialog"
+import { ResourceCounter } from "@/components/ui/feedback/resource-counter"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -61,10 +62,17 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">My Dashboards</h1>
-              <p className="text-muted-foreground">
-                {user?.plan?.name || "Free"} Plan: {dashboards.length} /{" "}
-                {user?.plan?.maxDashboards === -1 ? "Unlimited" : user?.plan?.maxDashboards || 1} dashboards
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-muted-foreground">
+                  {user?.plan?.name || "Free"} Plan
+                </p>
+                <span className="text-muted-foreground">•</span>
+                <ResourceCounter 
+                  current={dashboards.length}
+                  max={user?.plan?.maxDashboards || 1}
+                  label="dashboards"
+                />
+              </div>
             </div>
             <CreateDashboardDialog onDashboardCreated={loadDashboards} />
           </div>

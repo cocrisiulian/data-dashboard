@@ -3,6 +3,7 @@
 import { FileUploadForm } from "@/components/files/file-upload-form"
 import { FileList } from "@/components/files/file-list"
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
+import { ResourceCounter } from "@/components/ui/feedback/resource-counter"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -66,7 +67,16 @@ export default function UploadPage() {
             </div>
             
             <div>
-              <h2 className="text-xl font-semibold mb-4">Your Uploaded Files</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Your Uploaded Files</h2>
+                {user?.plan && (
+                  <ResourceCounter 
+                    current={files.length}
+                    max={user.plan.maxFiles}
+                    label="files"
+                  />
+                )}
+              </div>
               {loadingFiles ? (
                 <p className="text-muted-foreground">Loading files...</p>
               ) : (
