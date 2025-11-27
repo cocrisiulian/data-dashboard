@@ -231,7 +231,8 @@ const logout = async (req, res, next) => {
 
 /**
  * PATCH /api/auth/upgrade-plan
- * Upgrade user's subscription plan
+ * Upgrade or downgrade user's subscription plan
+ * Validates resource limits when downgrading
  */
 const upgradePlan = async (req, res, next) => {
   try {
@@ -265,6 +266,64 @@ const upgradePlan = async (req, res, next) => {
       })
     }
 
+    // Get current user with plan
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        plan: true
+      }
+    })
+
+    // Check if downgrading (moving to lower tier)
+    const isDowngrade = currentUser.plan && (
+      plan.maxFiles < currentUser.plan.maxFiles ||
+      plan.maxCharts < currentUser.plan.maxCharts ||
+      plan.maxDashboards < currentUser.plan.maxDashboards
+    )
+
+    if (isDowngrade) {
+      // Count current resources
+      const [filesCount, chartsCount, dashboardsCount] = await Promise.all([
+        prisma.file.count({ where: { userId } }),
+        prisma.chart.count({ where: { userId } }),
+        prisma.dashboard.count({ where: { userId } })
+      ])
+
+      // Validate against new plan limits
+      const violations = []
+      
+      if (filesCount > plan.maxFiles) {
+        violations.push(`You have ${filesCount} files but the ${plan.name} plan allows only ${plan.maxFiles}`)
+      }
+      
+      if (chartsCount > plan.maxCharts) {
+        violations.push(`You have ${chartsCount} charts but the ${plan.name} plan allows only ${plan.maxCharts}`)
+      }
+      
+      if (dashboardsCount > plan.maxDashboards) {
+        violations.push(`You have ${dashboardsCount} dashboards but the ${plan.name} plan allows only ${plan.maxDashboards}`)
+      }
+
+      if (violations.length > 0) {
+        return res.status(400).json({
+          error: 'Plan downgrade blocked',
+          message: 'Cannot downgrade: you exceed the new plan limits',
+          violations,
+          currentUsage: {
+            files: filesCount,
+            charts: chartsCount,
+            dashboards: dashboardsCount
+          },
+          newPlanLimits: {
+            maxFiles: plan.maxFiles,
+            maxCharts: plan.maxCharts,
+            maxDashboards: plan.maxDashboards
+          },
+          suggestion: 'Please delete some resources before downgrading your plan'
+        })
+      }
+    }
+
     // Update user's plan
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -286,21 +345,22 @@ const upgradePlan = async (req, res, next) => {
       }
     })
 
-    // Log the upgrade
+    // Log the plan change
     await prisma.usageLog.create({
       data: {
         userId,
-        action: 'plan_upgrade',
+        action: isDowngrade ? 'plan_downgrade' : 'plan_upgrade',
         details: { 
+          fromPlan: currentUser.plan?.name,
+          toPlan: plan.name,
           planId,
-          planName: plan.name,
           timestamp: new Date()
         }
       }
     })
 
     res.json({ 
-      message: 'Plan upgraded successfully', 
+      message: `Plan ${isDowngrade ? 'downgraded' : 'upgraded'} successfully`, 
       user: updatedUser 
     })
   } catch (error) {
