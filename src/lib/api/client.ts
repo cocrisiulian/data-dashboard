@@ -70,8 +70,15 @@ const auth = {
     return data
   },
 
-  upgradePlan: async (planId: string) => {
-    const { data } = await axiosInstance.patch('/api/auth/upgrade-plan', { planId })
+  upgradePlan: async (planId: string, deleteResources?: {
+    fileIds?: string[]
+    chartIds?: string[]
+    dashboardIds?: string[]
+  }) => {
+    const { data } = await axiosInstance.patch('/api/auth/upgrade-plan', { 
+      planId,
+      deleteResources 
+    })
     return data
   },
 }

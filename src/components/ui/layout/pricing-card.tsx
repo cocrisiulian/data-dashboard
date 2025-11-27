@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import type { Plan } from "@/lib/types/database"
 import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils/utils"
+import { ResourceCleanupModal } from "@/components/ui/modals/resource-cleanup-modal"
 
 export function PricingCard({
   plan,
@@ -19,6 +20,8 @@ export function PricingCard({
   const router = useRouter()
   const { refreshUser, user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [showCleanupModal, setShowCleanupModal] = useState(false)
+  const [cleanupData, setCleanupData] = useState<any>(null)
   const isCurrentPlan = currentPlanId === plan.id
   const isPro = plan.name === "Pro"
   const isCurrentUserPlan = user?.plan?.id === plan.id
@@ -57,9 +60,51 @@ export function PricingCard({
         router.push('/dashboard')
       }, 500)
     } catch (error: any) {
+      // Check if downgrade requires resource cleanup
+      if (error?.response?.data?.requiresSelection) {
+        setCleanupData(error.response.data)
+        setShowCleanupModal(true)
+        setLoading(false)
+        return
+      }
+
       toast({
         title: "Upgrade failed",
-        description: error?.message ?? "Something went wrong while upgrading.",
+        description: error?.response?.data?.message || error?.message || "Something went wrong while upgrading.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCleanupConfirm = async (selectedResources: {
+    fileIds: string[]
+    chartIds: string[]
+    dashboardIds: string[]
+  }) => {
+    setLoading(true)
+    try {
+      await api.auth.upgradePlan(plan.id, selectedResources)
+      
+      // Refresh user data
+      await refreshUser()
+      
+      toast({
+        title: "Plan downgraded",
+        description: `Successfully downgraded to ${plan.name} plan. Selected resources have been deleted.`,
+      })
+      
+      setShowCleanupModal(false)
+      router.refresh()
+      
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 500)
+    } catch (error: any) {
+      toast({
+        title: "Downgrade failed",
+        description: error?.response?.data?.message || error?.message || "Something went wrong.",
         variant: "destructive",
       })
     } finally {
@@ -125,6 +170,18 @@ export function PricingCard({
           {isCurrentUserPlan ? "Current Plan" : loading ? "Processing..." : isLoggedIn ? "Upgrade" : "Get Started"}
         </Button>
       </CardFooter>
+
+      {/* Resource Cleanup Modal */}
+      {cleanupData && (
+        <ResourceCleanupModal
+          open={showCleanupModal}
+          onOpenChange={setShowCleanupModal}
+          cleanupData={cleanupData}
+          planName={plan.name}
+          onConfirm={handleCleanupConfirm}
+          isLoading={loading}
+        />
+      )}
     </Card>
   )
 }
