@@ -303,7 +303,9 @@ const upgradePlan = async (req, res, next) => {
           prisma.chart.deleteMany({
             where: {
               id: { in: deleteResources.chartIds },
-              userId // Ensure user owns these charts
+              dashboard: {
+                userId // Ensure user owns these charts (through dashboard)
+              }
             }
           })
         )
