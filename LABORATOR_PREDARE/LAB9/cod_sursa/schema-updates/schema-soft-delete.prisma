@@ -1,0 +1,128 @@
+// Lab 9: Schema Update for Soft Delete Implementation
+// This file shows the modified schema with soft delete columns
+
+// ===========================
+// SOFT DELETE PATTERN
+// ===========================
+// Entities that need SOFT DELETE (referenced as FK in other tables):
+// - User (FK in files, dashboards, usage_logs)
+// - File (FK in charts)
+// - Dashboard (FK in charts)
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String    // hashed with bcrypt
+  fullName        String?   @map("full_name")
+  planId          String?   @map("plan_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  
+  // ✨ SOFT DELETE COLUMNS
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+  deletedAt       DateTime? @map("deleted_at")
+
+  plan            Plan?     @relation(fields: [planId], references: [id])
+  dashboards      Dashboard[]
+  files           File[]
+  usageLogs       UsageLog[]
+
+  @@index([isDeleted])  // Index for filtering queries
+  @@map("users")
+}
+
+model File {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  fileName        String    @map("file_name")
+  filePath        String    @map("file_path")
+  fileSize        Int       @map("file_size")
+  fileType        String    @map("file_type")
+  uploadedAt      DateTime  @default(now()) @map("uploaded_at")
+
+  // ✨ SOFT DELETE COLUMNS
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+  deletedAt       DateTime? @map("deleted_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charts          Chart[]
+
+  @@index([userId])
+  @@index([isDeleted])  // Index for filtering queries
+  @@map("files")
+}
+
+model Dashboard {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  name            String
+  description     String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // ✨ SOFT DELETE COLUMNS
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+  deletedAt       DateTime? @map("deleted_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charts          Chart[]
+
+  @@index([userId])
+  @@index([isDeleted])  // Index for filtering queries
+  @@map("dashboards")
+}
+
+// ===========================
+// HARD DELETE PATTERN
+// ===========================
+// Entities that support HARD DELETE (not used as FK or safe to remove):
+// - Plan (can be restricted if users exist)
+// - Chart (leaf node, no dependencies)
+// - UsageLog (audit data, can be purged)
+
+model Plan {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  maxFiles        Int      @map("max_files")
+  maxCharts       Int      @map("max_charts")
+  maxDashboards   Int      @map("max_dashboards")
+  price           Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  users           User[]
+
+  // NO SOFT DELETE - Uses hard delete with validation
+  @@map("plans")
+}
+
+model Chart {
+  id              String   @id @default(uuid())
+  dashboardId     String   @map("dashboard_id")
+  fileId          String   @map("file_id")
+  chartType       String   @map("chart_type")
+  chartConfig     Json     @map("chart_config")
+  title           String
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  dashboard       Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([dashboardId])
+  // NO SOFT DELETE - Uses hard delete (leaf entity)
+  @@map("charts")
+}
+
+model UsageLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  action          String
+  details         Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  // NO SOFT DELETE - Can be purged for cleanup
+  @@map("usage_logs")
+}

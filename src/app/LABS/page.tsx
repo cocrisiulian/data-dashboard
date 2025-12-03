@@ -69,6 +69,14 @@ export default function LabsIndexPage() {
       topics: ["API Consumption", "Vercel Deployment", "Railway Hosting", "Custom Domains"],
       color: "from-teal-500 to-cyan-700",
       href: "/LABS/lab8"
+    },
+    {
+      number: 9,
+      title: "Hard Delete & Soft Delete",
+      description: "Physical and logical deletion strategies for data management",
+      topics: ["Soft Delete Pattern", "Hard Delete Validation", "Data Recovery", "Audit Trail"],
+      color: "from-purple-500 to-pink-700",
+      href: "/LABS/lab9"
     }
   ]
 
@@ -86,7 +94,7 @@ export default function LabsIndexPage() {
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <Badge variant="outline" className="text-sm">Academic Year 2025-2026</Badge>
-              <Badge variant="outline" className="text-sm">8 Laboratory Assignments</Badge>
+              <Badge variant="outline" className="text-sm">9 Laboratory Assignments</Badge>
               <Badge variant="outline" className="text-sm">Full-Stack Development</Badge>
             </div>
           </div>
