@@ -136,17 +136,17 @@ export default function Lab8Page() {
   ]
 
   return (
-    <div className="bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 dark:from-slate-900 dark:to-teal-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-7xl mx-auto space-y-12">
           
           {/* Header */}
           <div className="text-center space-y-4">
             <Badge variant="outline" className="text-lg px-4 py-1">Laboratory 8</Badge>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
               API Integration & Web Deployment
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
               Complete frontend CRUD interfaces and production deployment on cloud infrastructure
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
