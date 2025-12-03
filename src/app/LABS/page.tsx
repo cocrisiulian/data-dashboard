@@ -77,6 +77,14 @@ export default function LabsIndexPage() {
       topics: ["Soft Delete Pattern", "Hard Delete Validation", "Data Recovery", "Audit Trail"],
       color: "from-purple-500 to-pink-700",
       href: "/LABS/lab9"
+    },
+    {
+      number: 10,
+      title: "Service Layer & Dependency Injection",
+      description: "Multi-tier architecture with business logic separation and DI container",
+      topics: ["Service Layer", "Repository Pattern", "Dependency Injection", "Lifetime Scopes"],
+      color: "from-indigo-500 to-blue-700",
+      href: "/LABS/lab10"
     }
   ]
 
@@ -94,7 +102,7 @@ export default function LabsIndexPage() {
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <Badge variant="outline" className="text-sm">Academic Year 2025-2026</Badge>
-              <Badge variant="outline" className="text-sm">9 Laboratory Assignments</Badge>
+              <Badge variant="outline" className="text-sm">10 Laboratory Assignments</Badge>
               <Badge variant="outline" className="text-sm">Full-Stack Development</Badge>
             </div>
           </div>
