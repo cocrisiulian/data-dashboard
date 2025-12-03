@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/layout/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/layout/tabs';
+import { Badge } from '@/components/ui/text/badge';
+import { Alert, AlertDescription } from '@/components/ui/feedback/alert';
 import { Layers, Database, Zap, Package, RefreshCw, Clock, Users } from 'lucide-react';
 
 export default function Lab10Page() {
