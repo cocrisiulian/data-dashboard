@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/controls/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Input } from "@/components/ui/controls/input"
 import { Label } from "@/components/ui/text/label"
-import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
+import { showError, showSuccess } from "@/lib/utils/error-handler"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -15,7 +15,6 @@ import { useState } from "react"
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { login } = useAuth()
@@ -23,13 +22,14 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
     try {
       await login(email, password)
+      showSuccess("Autentificare reușită! Bun venit înapoi.")
       router.push("/dashboard")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      // showError will handle user-friendly message and log technical details
+      showError(error)
     } finally {
       setIsLoading(false)
     }
@@ -67,19 +67,14 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "Se autentifică..." : "Autentificare"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Nu ai cont?{" "}
                 <Link href="/register" className="underline underline-offset-4">
-                  Sign up
+                  Înregistrează-te
                 </Link>
               </div>
             </form>

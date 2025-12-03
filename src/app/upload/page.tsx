@@ -5,6 +5,7 @@ import { FileList } from "@/components/files/file-list"
 import { DashboardNav } from "@/components/dashboard/dashboard-nav"
 import { ResourceCounter } from "@/components/ui/feedback/resource-counter"
 import { useAuth } from "@/contexts/AuthContext"
+import { showError } from "@/lib/utils/error-handler"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api/client"
@@ -33,7 +34,7 @@ export default function UploadPage() {
       const data = await api.files.getAll()
       setFiles(data)
     } catch (error) {
-      console.error("Failed to load files:", error)
+      showError(error, "Nu am putut încărca lista de fișiere. Te rugăm să reîncarci pagina.")
     } finally {
       setLoadingFiles(false)
     }

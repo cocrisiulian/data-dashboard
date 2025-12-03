@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/controls/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Input } from "@/components/ui/controls/input"
 import { Label } from "@/components/ui/text/label"
-import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
+import { showError, showSuccess } from "@/lib/utils/error-handler"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -17,7 +17,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
   const [repeatPassword, setRepeatPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { register } = useAuth()
@@ -25,26 +24,27 @@ export default function RegisterPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match")
+      showError({ message: "Parolele nu se potrivesc" }, "Parolele nu se potrivesc. Te rugăm să le introduci din nou.")
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters")
+      showError({ message: "Password too short" }, "Parola trebuie să aibă cel puțin 6 caractere.")
       setIsLoading(false)
       return
     }
 
     try {
       await register(email, password, fullName)
+      showSuccess("Contul tău a fost creat cu succes! Bun venit!")
       // Redirect directly to dashboard after successful registration
       router.push("/dashboard")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      // showError will handle user-friendly message and log technical details
+      showError(error)
     } finally {
       setIsLoading(false)
     }
@@ -103,19 +103,14 @@ export default function RegisterPage() {
                     onChange={(e) => setRepeatPassword(e.target.value)}
                   />
                 </div>
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Sign up"}
+                  {isLoading ? "Se creează contul..." : "Înregistrează-te"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
+                Ai deja cont?{" "}
                 <Link href="/login" className="underline underline-offset-4">
-                  Login
+                  Autentifică-te
                 </Link>
               </div>
             </form>

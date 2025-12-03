@@ -10,7 +10,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api/client"
 import { useAuth } from "@/contexts/AuthContext"
-import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
+import { showError } from "@/lib/utils/error-handler"
 
 export default function DashboardDetailPage() {
   const params = useParams()
@@ -19,7 +19,6 @@ export default function DashboardDetailPage() {
   const [dashboard, setDashboard] = useState<any>(null)
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const id = params.id as string
 
@@ -37,7 +36,6 @@ export default function DashboardDetailPage() {
   const loadDashboard = async () => {
     try {
       setIsLoading(true)
-      setError(null)
       const [dashboardData, filesData] = await Promise.all([
         api.dashboards.getOne(id),
         api.files.getAll()
@@ -45,8 +43,7 @@ export default function DashboardDetailPage() {
       setDashboard(dashboardData)
       setFiles(filesData)
     } catch (error) {
-      console.error("Failed to load dashboard:", error)
-      setError(error instanceof Error ? error.message : "Failed to load dashboard")
+      showError(error, "Nu am putut încărca dashboard-ul. Te rugăm să verifici dacă există.")
     } finally {
       setIsLoading(false)
     }
@@ -77,12 +74,6 @@ export default function DashboardDetailPage() {
               </Link>
             </Button>
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">

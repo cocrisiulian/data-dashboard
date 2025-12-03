@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/controls/button"
 import { Input } from "@/components/ui/controls/input"
 import { Label } from "@/components/ui/text/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/layout/card"
-import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 import { Upload, FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api/client"
+import { showError, showSuccess } from "@/lib/utils/error-handler"
 
 export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUploaded?: () => void; onUploadSuccess?: () => void }) {
   const [file, setFile] = useState<File | null>(null)
-  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const router = useRouter()
@@ -38,9 +37,8 @@ export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUplo
       const droppedFile = e.dataTransfer.files[0]
       if (droppedFile.type === "text/csv" || droppedFile.name.endsWith(".csv")) {
         setFile(droppedFile)
-        setError("")
       } else {
-        setError("Please upload a CSV file")
+        showError({ message: "Invalid file type" }, "Te rugăm să încarci un fișier CSV valid.")
       }
     }
   }
@@ -50,9 +48,8 @@ export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUplo
       const selectedFile = e.target.files[0]
       if (selectedFile.type === "text/csv" || selectedFile.name.endsWith(".csv")) {
         setFile(selectedFile)
-        setError("")
       } else {
-        setError("Please upload a CSV file")
+        showError({ message: "Invalid file type" }, "Te rugăm să încarci un fișier CSV valid.")
       }
     }
   }
@@ -60,21 +57,21 @@ export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUplo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!file) {
-      setError("Please select a file")
+      showError({ message: "No file selected" }, "Te rugăm să selectezi un fișier CSV pentru a continua.")
       return
     }
 
     setLoading(true)
-    setError("")
 
     try {
       const uploadedFile = await api.files.upload(file)
       setFile(null)
+      showSuccess("Încărcarea fișierului a fost realizată cu succes!")
       onFileUploaded?.()
       onUploadSuccess?.()
       router.push(`/files/${uploadedFile.id}`)
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Failed to upload file")
+      showError(err)
     } finally {
       setLoading(false)
     }
@@ -88,12 +85,6 @@ export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUplo
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               dragActive ? "border-primary bg-primary/5" : "border-border"
@@ -126,13 +117,13 @@ export function FileUploadForm({ onFileUploaded, onUploadSuccess }: { onFileUplo
                 <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={() => setFile(null)}>
-                Remove
+                Șterge
               </Button>
             </div>
           )}
 
           <Button type="submit" className="w-full" disabled={!file || loading}>
-            {loading ? "Uploading..." : "Upload File"}
+            {loading ? "Se încarcă..." : "Înarcă fișierul"}
           </Button>
         </form>
       </CardContent>

@@ -5,17 +5,16 @@ import { DashboardList } from "@/components/dashboard/dashboard-list"
 import { CreateDashboardDialog } from "@/components/dashboard/create-dashboard-dialog"
 import { ResourceCounter } from "@/components/ui/feedback/resource-counter"
 import { useAuth } from "@/contexts/AuthContext"
+import { showError } from "@/lib/utils/error-handler"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api/client"
-import { Alert, AlertDescription } from "@/components/ui/feedback/alert"
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,12 +30,10 @@ export default function DashboardPage() {
   const loadDashboards = async () => {
     try {
       setIsLoading(true)
-      setError(null)
       const data = await api.dashboards.getAll()
       setDashboards(data)
     } catch (error) {
-      console.error("Failed to load dashboards:", error)
-      setError(error instanceof Error ? error.message : "Failed to load dashboards")
+      showError(error, "Nu am putut încărca dashboard-urile. Te rugăm să reîncarci pagina.")
     } finally {
       setIsLoading(false)
     }
@@ -76,12 +73,6 @@ export default function DashboardPage() {
             </div>
             <CreateDashboardDialog onDashboardCreated={loadDashboards} />
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           <DashboardList dashboards={dashboards} onDashboardDeleted={loadDashboards} />
         </div>
