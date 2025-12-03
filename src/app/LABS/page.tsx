@@ -61,6 +61,14 @@ export default function LabsIndexPage() {
       topics: ["CSV Parser", "Type Detection", "Data Analysis", "Chart Suggestions"],
       color: "from-orange-500 to-red-700",
       href: "/LABS/lab7"
+    },
+    {
+      number: 8,
+      title: "API Integration & Deployment",
+      description: "Frontend CRUD interfaces and production web hosting",
+      topics: ["API Consumption", "Vercel Deployment", "Railway Hosting", "Custom Domains"],
+      color: "from-teal-500 to-cyan-700",
+      href: "/LABS/lab8"
     }
   ]
 
@@ -78,7 +86,7 @@ export default function LabsIndexPage() {
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <Badge variant="outline" className="text-sm">Academic Year 2025-2026</Badge>
-              <Badge variant="outline" className="text-sm">7 Laboratory Assignments</Badge>
+              <Badge variant="outline" className="text-sm">8 Laboratory Assignments</Badge>
               <Badge variant="outline" className="text-sm">Full-Stack Development</Badge>
             </div>
           </div>
@@ -123,6 +131,20 @@ export default function LabsIndexPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Lab 7 focuses on CSV parsing, data type detection, and preparing datasets for interactive visualization.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">🚀</span>
+                  Deployment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Lab 8 demonstrates production deployment with Vercel (frontend), Railway (backend + database), and custom domains.
                 </p>
               </CardContent>
             </Card>
