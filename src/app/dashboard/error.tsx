@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react';
+import { useEffect } from "react";
+import { Button } from '@/components/ui/controls/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/layout/card';
+import { AlertCircle, RefreshCw, Home, LayoutDashboard } from "lucide-react";
 import Link from 'next/link';
 
 export default function DashboardError({
