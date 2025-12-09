@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/controls/button"
-import { BarChart3, Upload, LayoutDashboard, CreditCard, LogOut, BookOpen } from "lucide-react"
+import { BarChart3, Upload, LayoutDashboard, CreditCard, LogOut, BookOpen, User } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 
@@ -42,10 +42,16 @@ export function DashboardNav() {
                 Pricing
               </Button>
             </Link>
-            <Link href="/LABS" className="pl-2">
+            <Link href="/LABS" className="px-2">
               <Button variant="ghost" size="sm">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Labs
+              </Button>
+            </Link>
+            <Link href="/profile" className="pl-2">
+              <Button variant="ghost" size="sm">
+                <User className="h-4 w-4 mr-2" />
+                Profile
               </Button>
             </Link>
           </nav>

@@ -81,6 +81,19 @@ const auth = {
     })
     return data
   },
+
+  updateProfile: async (updates: { fullName?: string; email?: string }) => {
+    const { data } = await axiosInstance.patch('/api/auth/profile', updates)
+    return data
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const { data } = await axiosInstance.patch('/api/auth/change-password', {
+      currentPassword,
+      newPassword
+    })
+    return data
+  },
 }
 
 // ==================== DASHBOARDS ====================
