@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/controls/button";
+import { Card, CardContent } from "@/components/ui/layout/card";
 import { Home, BookOpen, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full border-slate-700 bg-slate-900/50 backdrop-blur">
         <CardContent className="pt-12 pb-8 px-8 text-center">
           {/* 404 Number */}

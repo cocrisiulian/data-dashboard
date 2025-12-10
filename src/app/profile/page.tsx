@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/text/label"
 import { Badge } from "@/components/ui/text/badge"
 import { Separator } from "@/components/ui/text/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/layout/tabs"
-import { User, Mail, CreditCard, BarChart3, FileText, LayoutDashboard, Settings, Shield } from "lucide-react"
+import { User, Mail, CreditCard, BarChart3, FileText, LayoutDashboard, Settings, Shield, Palette } from "lucide-react"
 import { useState, useEffect } from "react"
 import { api } from "@/lib/api/client"
 import { showError, showSuccess } from "@/lib/utils/error-handler"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useBackgroundTheme } from "@/contexts/BackgroundThemeContext"
 
 type UserStats = {
   dashboards: number
@@ -24,6 +25,7 @@ type UserStats = {
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser, logout } = useAuth()
+  const { bgTheme, setBgTheme } = useBackgroundTheme()
   const router = useRouter()
   const [stats, setStats] = useState<UserStats>({ dashboards: 0, files: 0, charts: 0 })
   const [loadingStats, setLoadingStats] = useState(true)
@@ -156,7 +158,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen">
       <DashboardNav />
       
       <main className="container mx-auto px-4 py-8">
@@ -227,6 +229,10 @@ export default function ProfilePage() {
                 <User className="h-4 w-4 mr-2" />
                 Profil
               </TabsTrigger>
+              <TabsTrigger value="appearance" className="data-[state=active]:bg-slate-700">
+                <Palette className="h-4 w-4 mr-2" />
+                Aspect
+              </TabsTrigger>
               <TabsTrigger value="plan" className="data-[state=active]:bg-slate-700">
                 <CreditCard className="h-4 w-4 mr-2" />
                 Abonament
@@ -279,6 +285,105 @@ export default function ProfilePage() {
                       {updatingProfile ? "Se actualizează..." : "Salvează Modificările"}
                     </Button>
                   </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Appearance Tab */}
+            <TabsContent value="appearance" className="space-y-6">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Temă Fundal</CardTitle>
+                  <CardDescription className="text-slate-300">
+                    Alege stilul de fundal pentru întreaga aplicație
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {/* Dark Theme */}
+                    <div 
+                      onClick={() => setBgTheme("dark")}
+                      className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${
+                        bgTheme === "dark" 
+                          ? "border-blue-500 ring-2 ring-blue-500/50" 
+                          : "border-slate-600 hover:border-slate-500"
+                      }`}
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-slate-900 to-slate-950 p-4 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-white font-semibold mb-1">Dark</div>
+                          <div className="text-xs text-slate-400">Fundal întunecat clasic</div>
+                        </div>
+                      </div>
+                      {bgTheme === "dark" && (
+                        <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Light Theme */}
+                    <div 
+                      onClick={() => setBgTheme("light")}
+                      className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${
+                        bgTheme === "light" 
+                          ? "border-blue-500 ring-2 ring-blue-500/50" 
+                          : "border-slate-600 hover:border-slate-500"
+                      }`}
+                    >
+                      <div className="aspect-video bg-white p-4 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-slate-900 font-semibold mb-1">Light</div>
+                          <div className="text-xs text-slate-600">Fundal alb luminos</div>
+                        </div>
+                      </div>
+                      {bgTheme === "light" && (
+                        <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Gradient Theme */}
+                    <div 
+                      onClick={() => setBgTheme("gradient")}
+                      className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${
+                        bgTheme === "gradient" 
+                          ? "border-blue-500 ring-2 ring-blue-500/50" 
+                          : "border-slate-600 hover:border-slate-500"
+                      }`}
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 p-4 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-white font-semibold mb-1">Gradient</div>
+                          <div className="text-xs text-slate-300">Gradient elegant</div>
+                        </div>
+                      </div>
+                      {bgTheme === "gradient" && (
+                        <div className="absolute top-2 right-2 bg-blue-500 rounded-full p-1">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+                    <p className="text-sm text-slate-300">
+                      <span className="font-semibold">Temă curentă:</span>{" "}
+                      {bgTheme === "dark" && "Dark - Fundal întunecat clasic"}
+                      {bgTheme === "light" && "Light - Fundal alb luminos"}
+                      {bgTheme === "gradient" && "Gradient - Gradient elegant slate"}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-2">
+                      Schimbările se aplică instant în întreaga aplicație și sunt salvate automat.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

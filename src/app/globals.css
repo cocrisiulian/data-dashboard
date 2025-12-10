@@ -42,7 +42,115 @@
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Background Theme Classes - These override default styles */
+body.bg-dark {
+  background: linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a) !important;
+  min-height: 100vh;
+  color: #ededed !important;
+}
+
+body.bg-light {
+  background: #ffffff !important;
+  min-height: 100vh;
+  color: #171717 !important;
+}
+
+body.bg-gradient {
+  background: linear-gradient(to bottom right, #1e293b, #334155, #1e293b) !important;
+  min-height: 100vh;
+  color: #ededed !important;
+}
+
+/* Adaptive colors for light theme */
+body.bg-light .text-white {
+  color: #171717 !important;
+}
+
+body.bg-light .text-slate-300,
+body.bg-light .text-slate-400 {
+  color: #525252 !important;
+}
+
+body.bg-light .bg-slate-800\/50,
+body.bg-light .bg-slate-800 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: #e5e7eb !important;
+}
+
+body.bg-light .border-slate-700,
+body.bg-light .border-slate-600 {
+  border-color: #d1d5db !important;
+}
+
+body.bg-light .bg-slate-700\/50,
+body.bg-light .bg-slate-700\/30 {
+  background-color: rgba(243, 244, 246, 0.8) !important;
+}
+
+body.bg-light .bg-slate-700 {
+  background-color: #f3f4f6 !important;
+}
+
+body.bg-light .bg-slate-950 {
+  background-color: #f9fafb !important;
+  color: #171717 !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+body.bg-light .text-slate-50 {
+  color: #171717 !important;
+}
+
+/* Override all gradient backgrounds on LABS pages for light theme */
+body.bg-light [class*="bg-gradient-to-"] {
+  background: #ffffff !important;
+  background-image: none !important;
+}
+
+/* Keep text gradient animations for titles */
+body.bg-light .bg-clip-text {
+  background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* Override Tailwind semantic colors for light theme */
+body.bg-light .bg-card {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+}
+
+body.bg-light .bg-muted {
+  background-color: #f9fafb !important;
+}
+
+body.bg-light .text-muted-foreground {
+  color: #6b7280 !important;
+}
+
+body.bg-light .text-card-foreground {
+  color: #171717 !important;
+}
+
+/* Override color-specific backgrounds (blue, purple, etc.) */
+body.bg-light [class*="bg-blue-50"],
+body.bg-light [class*="bg-purple-50"],
+body.bg-light [class*="bg-green-50"],
+body.bg-light [class*="bg-red-50"],
+body.bg-light [class*="bg-orange-50"],
+body.bg-light [class*="bg-yellow-50"],
+body.bg-light [class*="bg-pink-50"] {
+  background-color: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Override dark color variants */
+body.bg-light [class*="-950"],
+body.bg-light [class*="-900"] {
+  background-color: #f9fafb !important;
+  color: #171717 !important;
 }

@@ -85,6 +85,14 @@ export default function LabsIndexPage() {
       topics: ["Service Layer", "Repository Pattern", "Dependency Injection", "Lifetime Scopes"],
       color: "from-indigo-500 to-blue-700",
       href: "/LABS/lab10"
+    },
+    {
+      number: 11,
+      title: "Code Review, Logging & Documentation",
+      description: "Professional development practices: code quality, monitoring, and deployment",
+      topics: ["Code Review Checklist", "Winston Logger", "Installation Docs", "Best Practices"],
+      color: "from-emerald-500 to-teal-700",
+      href: "/LABS/lab11"
     }
   ]
 
@@ -102,7 +110,7 @@ export default function LabsIndexPage() {
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
               <Badge variant="outline" className="text-sm">Academic Year 2025-2026</Badge>
-              <Badge variant="outline" className="text-sm">10 Laboratory Assignments</Badge>
+              <Badge variant="outline" className="text-sm">11 Laboratory Assignments</Badge>
               <Badge variant="outline" className="text-sm">Full-Stack Development</Badge>
             </div>
           </div>

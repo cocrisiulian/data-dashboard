@@ -16,6 +16,7 @@ const labs = [
   { number: 8, title: "API & Deployment", href: "/LABS/lab8", icon: "🚀" },
   { number: 9, title: "Hard & Soft Delete", href: "/LABS/lab9", icon: "🗑️" },
   { number: 10, title: "Service Layer & DI", href: "/LABS/lab10", icon: "⚙️" },
+  { number: 11, title: "Code Review & Logging", href: "/LABS/lab11", icon: "📝" },
 ]
 
 export function LabsSidebar() {

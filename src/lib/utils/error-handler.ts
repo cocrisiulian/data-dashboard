@@ -80,11 +80,12 @@ export const showError = (error: any, customMessage?: string) => {
 
   // Log technical details to console for developers
   console.error('Error details:', {
-    status: error.response?.status,
-    statusText: error.response?.statusText,
-    data: error.response?.data,
-    message: error.message,
-    stack: error.stack,
+    status: error?.response?.status,
+    statusText: error?.response?.statusText,
+    data: error?.response?.data,
+    message: error?.message,
+    stack: error?.stack,
+    fullError: error,
   });
 
   // Show user-friendly toast

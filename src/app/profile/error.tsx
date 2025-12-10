@@ -18,7 +18,7 @@ export default function ProfileError({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-2xl w-full bg-slate-800/50 border-slate-700">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center">
