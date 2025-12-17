@@ -50,7 +50,7 @@ export class PlanService {
     const plans = await this.planRepository.findAll();
     
     // Business logic: Add computed properties
-    return plans.map(plan => ({
+    return plans.map((plan: PlanWithCount) => ({
       ...plan,
       isPopular: (plan._count?.users || 0) > 10, // Business rule
       valueScore: this.calculateValueScore(plan), // Business calculation

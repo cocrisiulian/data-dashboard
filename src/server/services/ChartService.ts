@@ -52,7 +52,7 @@ export class ChartService {
 
     const charts = await this.chartRepository.findAllByDashboardId(dashboardId);
     
-    return charts.map(chart => this.toDTO(chart));
+    return charts.map((chart: Chart) => this.toDTO(chart));
   }
 
   /**

@@ -39,7 +39,7 @@ export class FileService {
     const files = await this.fileRepository.findAllByUserId(userId);
     
     // Transform la snake_case pentru frontend compatibility
-    return files.map(file => this.toDTO(file));
+    return files.map((file: File) => this.toDTO(file));
   }
 
   /**
@@ -134,7 +134,7 @@ export class FileService {
   async getFilesWithCharts(userId: string): Promise<any[]> {
     const files = await this.fileRepository.findWithCharts(userId);
     
-    return files.map(file => ({
+    return files.map((file: any) => ({
       ...this.toDTO(file),
       charts: file.charts || []
     }));

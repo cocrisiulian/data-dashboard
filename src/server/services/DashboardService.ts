@@ -49,7 +49,7 @@ export class DashboardService {
   async getAllDashboards(userId: string): Promise<DashboardDTO[]> {
     const dashboards = await this.dashboardRepository.findAllByUserId(userId);
     
-    return dashboards.map(dashboard => this.toDTO(dashboard));
+    return dashboards.map((dashboard: Dashboard) => this.toDTO(dashboard));
   }
 
   /**
