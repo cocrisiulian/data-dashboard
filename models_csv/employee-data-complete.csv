@@ -1,0 +1,46 @@
+Employee_ID,Name,Department,Position,Hire_Date,Salary,Bonus,Performance_Score,Years_Experience,Education,Age,Gender,City,Country,Work_Hours_Per_Week,Sick_Days_2024,Vacation_Days_2024,Projects_Completed,Team_Size,Manager_ID,Certification_Count,Training_Hours_2024
+E001,Sarah Johnson,Engineering,Senior Software Engineer,2018-03-15,95000,8500,4.8,12,Master's,34,F,San Francisco,USA,40,3,15,24,8,M001,3,120
+E002,Michael Chen,Engineering,DevOps Engineer,2019-07-22,85000,7200,4.5,8,Bachelor's,30,M,Seattle,USA,42,2,12,18,6,M001,2,95
+E003,Emily Davis,Marketing,Marketing Manager,2017-05-10,92000,9000,4.9,15,Master's,38,F,New York,USA,45,1,20,32,12,M002,4,85
+E004,James Wilson,Sales,Sales Director,2015-01-08,110000,15000,5.0,18,Master's,42,M,Chicago,USA,48,0,18,45,15,CEO,5,60
+E005,Anna Martinez,HR,HR Specialist,2020-09-14,65000,4500,4.3,6,Bachelor's,28,F,Austin,USA,40,4,14,15,4,M003,1,110
+E006,Robert Taylor,Finance,Financial Analyst,2019-11-30,78000,6200,4.6,7,Master's,31,M,Boston,USA,40,2,16,22,5,M004,2,75
+E007,Lisa Anderson,Engineering,Junior Developer,2022-02-18,62000,3800,4.2,3,Bachelor's,25,F,San Jose,USA,40,5,10,12,8,M001,1,140
+E008,David Lee,Sales,Account Executive,2018-08-25,72000,8500,4.7,9,Bachelor's,33,M,Los Angeles,USA,42,1,15,28,6,E004,2,70
+E009,Jennifer Brown,Marketing,Content Specialist,2021-04-12,58000,3500,4.1,4,Bachelor's,27,F,Miami,USA,40,3,12,16,4,E003,1,95
+E010,Daniel Garcia,IT,System Administrator,2017-12-05,75000,5800,4.4,10,Bachelor's,35,M,Denver,USA,40,2,14,20,3,M005,3,88
+E011,Michelle White,Engineering,Full Stack Developer,2020-01-20,88000,7500,4.8,7,Master's,32,F,Portland,USA,41,1,16,26,8,M001,2,105
+E012,Christopher Moore,Sales,Regional Sales Manager,2016-06-15,98000,12000,4.9,14,Master's,39,M,Dallas,USA,46,0,17,38,10,E004,4,65
+E013,Amanda Clark,HR,Recruitment Lead,2019-03-08,70000,5500,4.5,8,Bachelor's,33,F,Philadelphia,USA,40,3,15,24,6,M003,2,92
+E014,Kevin Rodriguez,Finance,Senior Accountant,2018-10-22,82000,6800,4.6,11,Master's,36,M,Houston,USA,40,2,16,28,4,M004,3,78
+E015,Jessica Lewis,Marketing,Social Media Manager,2021-07-30,64000,4200,4.3,5,Bachelor's,29,F,San Diego,USA,40,4,13,18,5,E003,1,100
+E016,Ryan Walker,Engineering,Tech Lead,2016-02-14,105000,10500,5.0,16,Master's,40,M,San Francisco,USA,44,0,19,42,12,M001,5,82
+E017,Nicole Hall,Sales,Business Development,2020-05-19,68000,6500,4.4,6,Bachelor's,30,F,Seattle,USA,41,2,14,20,4,E004,2,87
+E018,Brandon Allen,IT,Cloud Architect,2017-09-11,96000,8800,4.7,13,Master's,37,M,Austin,USA,42,1,17,30,5,M005,4,90
+E019,Stephanie Young,HR,Compensation Analyst,2022-01-10,61000,3600,4.0,3,Bachelor's,26,F,Chicago,USA,40,5,11,10,3,M003,1,125
+E020,Gregory King,Finance,Controller,2015-04-20,115000,14000,4.9,17,Master's,43,M,New York,USA,47,0,20,40,8,M004,5,55
+E021,Rachel Wright,Engineering,QA Engineer,2019-12-02,72000,5600,4.5,7,Bachelor's,31,F,Boston,USA,40,3,15,24,6,M001,2,98
+E022,Timothy Scott,Sales,Inside Sales Rep,2021-11-08,58000,5200,4.2,4,Bachelor's,28,M,Miami,USA,40,4,12,16,3,E004,1,85
+E023,Laura Green,Marketing,Brand Manager,2018-06-25,86000,7800,4.8,10,Master's,35,F,Los Angeles,USA,43,1,18,28,8,E003,3,75
+E024,Jason Hill,IT,Network Engineer,2020-03-17,79000,6200,4.4,6,Bachelor's,32,M,Denver,USA,40,2,14,18,4,M005,2,93
+E025,Megan Adams,Engineering,Data Scientist,2019-08-30,98000,9200,4.9,9,PhD,34,F,San Jose,USA,42,1,17,34,6,M001,4,110
+E026,Eric Baker,Sales,Sales Engineer,2017-11-14,88000,9500,4.7,12,Master's,38,M,Portland,USA,43,1,16,32,7,E004,3,72
+E027,Kimberly Nelson,HR,Training Coordinator,2021-02-22,59000,3700,4.1,4,Bachelor's,27,F,Dallas,USA,40,4,13,14,5,M003,1,115
+E028,Andrew Carter,Finance,Budget Analyst,2020-07-06,71000,5400,4.3,5,Bachelor's,30,M,Philadelphia,USA,40,3,14,17,3,M004,2,86
+E029,Elizabeth Mitchell,Marketing,Email Marketing Spec,2022-04-11,56000,3200,4.0,2,Bachelor's,25,F,Houston,USA,40,5,10,11,3,E003,1,130
+E030,Matthew Perez,Engineering,Backend Developer,2018-12-20,82000,7000,4.6,8,Bachelor's,32,M,San Diego,USA,41,2,15,25,8,M001,2,96
+E031,Ashley Roberts,Sales,Customer Success Mgr,2019-05-28,76000,7200,4.5,7,Bachelor's,31,F,San Francisco,USA,42,2,15,26,5,E004,2,80
+E032,Joshua Turner,IT,Security Analyst,2021-09-13,84000,6600,4.4,5,Master's,29,M,Seattle,USA,40,3,13,19,3,M005,3,105
+E033,Samantha Phillips,HR,Benefits Administrator,2020-10-05,63000,4100,4.2,5,Bachelor's,29,F,Austin,USA,40,4,14,16,4,M003,1,100
+E034,Justin Campbell,Finance,Tax Specialist,2018-03-19,80000,6500,4.6,10,Master's,35,M,Chicago,USA,40,2,16,27,4,M004,3,77
+E035,Rebecca Parker,Marketing,Product Marketing Mgr,2017-07-24,89000,8200,4.8,13,Master's,37,F,New York,USA,44,1,18,31,9,E003,4,68
+E036,Nathan Evans,Engineering,Mobile Developer,2021-01-11,75000,5900,4.3,5,Bachelor's,28,M,Boston,USA,40,3,13,18,6,M001,2,108
+E037,Christina Edwards,Sales,Territory Manager,2019-09-16,74000,7800,4.6,8,Bachelor's,33,F,Miami,USA,42,2,15,24,6,E004,2,83
+E038,Tyler Collins,IT,Database Administrator,2018-04-23,81000,6400,4.5,9,Bachelor's,34,M,Los Angeles,USA,40,2,15,23,3,M005,3,89
+E039,Victoria Stewart,HR,Diversity & Inclusion,2022-03-07,66000,4300,4.1,3,Master's,27,F,Denver,USA,40,5,12,12,4,M003,2,118
+E040,Austin Morris,Finance,Investment Analyst,2020-11-30,86000,7100,4.7,6,Master's,31,M,San Jose,USA,41,1,16,22,4,M004,3,91
+M001,Richard Hughes,Engineering,Engineering Director,2014-05-12,135000,18000,5.0,20,Master's,45,M,San Francisco,USA,50,0,22,55,35,CTO,6,45
+M002,Patricia Rogers,Marketing,VP Marketing,2013-08-19,145000,20000,4.9,22,MBA,47,F,New York,USA,52,0,23,62,28,CEO,7,40
+M003,William Cook,HR,HR Director,2015-11-03,125000,16000,4.8,19,Master's,44,M,Chicago,USA,48,1,21,48,15,CEO,5,50
+M004,Maria Morgan,Finance,CFO,2012-02-28,175000,25000,5.0,25,MBA,50,F,New York,USA,55,0,25,70,20,CEO,8,35
+M005,Thomas Bell,IT,CTO,2013-06-15,165000,22000,5.0,23,PhD,48,M,San Francisco,USA,54,0,24,65,18,CEO,7,38

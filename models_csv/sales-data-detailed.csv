@@ -1,0 +1,37 @@
+Product,Category,Region,Sales,Revenue,Profit,Units_Sold,Month,Year,Customer_Rating,Return_Rate
+Laptop Pro 15,Electronics,North America,45000,1350000,405000,300,January,2025,4.5,2.3
+Smartphone X,Electronics,Europe,38000,760000,228000,500,January,2025,4.7,1.8
+Wireless Mouse,Accessories,Asia,12000,240000,96000,800,January,2025,4.3,3.5
+USB-C Cable,Accessories,North America,8000,80000,40000,2000,January,2025,4.1,5.2
+Office Chair Pro,Furniture,Europe,25000,500000,125000,200,January,2025,4.6,1.5
+Standing Desk,Furniture,Asia,35000,700000,210000,150,January,2025,4.8,1.2
+Laptop Pro 15,Electronics,Europe,42000,1260000,378000,280,February,2025,4.6,2.1
+Smartphone X,Electronics,Asia,41000,820000,246000,520,February,2025,4.8,1.5
+Wireless Mouse,Accessories,North America,13500,270000,108000,900,February,2025,4.4,3.2
+USB-C Cable,Accessories,Europe,9000,90000,45000,2250,February,2025,4.2,4.8
+Office Chair Pro,Furniture,Asia,28000,560000,140000,220,February,2025,4.7,1.3
+Standing Desk,Furniture,North America,38000,760000,228000,165,February,2025,4.9,1.0
+Laptop Pro 15,Electronics,Asia,48000,1440000,432000,320,March,2025,4.7,2.0
+Smartphone X,Electronics,North America,44000,880000,264000,550,March,2025,4.9,1.4
+Wireless Mouse,Accessories,Europe,14000,280000,112000,950,March,2025,4.5,3.0
+USB-C Cable,Accessories,Asia,10000,100000,50000,2500,March,2025,4.3,4.5
+Office Chair Pro,Furniture,North America,30000,600000,150000,240,March,2025,4.8,1.1
+Standing Desk,Furniture,Europe,40000,800000,240000,180,March,2025,5.0,0.8
+Laptop Pro 15,Electronics,North America,50000,1500000,450000,335,April,2025,4.8,1.9
+Smartphone X,Electronics,Europe,46000,920000,276000,575,April,2025,5.0,1.2
+Wireless Mouse,Accessories,Asia,15000,300000,120000,1000,April,2025,4.6,2.8
+USB-C Cable,Accessories,North America,11000,110000,55000,2750,April,2025,4.4,4.2
+Office Chair Pro,Furniture,Europe,32000,640000,160000,260,April,2025,4.9,1.0
+Standing Desk,Furniture,Asia,42000,840000,252000,190,April,2025,5.0,0.7
+Laptop Pro 15,Electronics,Europe,52000,1560000,468000,350,May,2025,4.9,1.8
+Smartphone X,Electronics,Asia,48000,960000,288000,600,May,2025,5.0,1.1
+Wireless Mouse,Accessories,North America,16000,320000,128000,1100,May,2025,4.7,2.6
+USB-C Cable,Accessories,Europe,12000,120000,60000,3000,May,2025,4.5,4.0
+Office Chair Pro,Furniture,Asia,34000,680000,170000,280,May,2025,5.0,0.9
+Standing Desk,Furniture,North America,44000,880000,264000,200,May,2025,5.0,0.6
+Laptop Pro 15,Electronics,Asia,54000,1620000,486000,365,June,2025,5.0,1.7
+Smartphone X,Electronics,North America,50000,1000000,300000,625,June,2025,5.0,1.0
+Wireless Mouse,Accessories,Europe,17000,340000,136000,1150,June,2025,4.8,2.5
+USB-C Cable,Accessories,Asia,13000,130000,65000,3250,June,2025,4.6,3.8
+Office Chair Pro,Furniture,North America,36000,720000,180000,300,June,2025,5.0,0.8
+Standing Desk,Furniture,Europe,46000,920000,276000,210,June,2025,5.0,0.5

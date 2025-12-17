@@ -1,0 +1,42 @@
+Date,Customer_ID,Customer_Name,Age,Gender,Country,City,Product_Category,Product_Name,Quantity,Unit_Price,Total_Amount,Payment_Method,Shipping_Method,Delivery_Days,Customer_Satisfaction,Discount_Applied,Promo_Code
+2025-01-05,C001,John Smith,34,M,USA,New York,Electronics,Laptop Dell XPS,1,1299.99,1299.99,Credit Card,Express,2,5,0,NONE
+2025-01-05,C002,Maria Garcia,28,F,Spain,Madrid,Fashion,Summer Dress,2,49.99,99.98,PayPal,Standard,5,4,10,SUMMER10
+2025-01-06,C003,Li Wei,45,M,China,Beijing,Electronics,Wireless Headphones,3,89.99,269.97,Debit Card,Express,3,5,15,TECH15
+2025-01-06,C004,Emma Johnson,31,F,UK,London,Home & Garden,Kitchen Set,1,159.99,159.99,Credit Card,Standard,4,4,0,NONE
+2025-01-07,C005,Carlos Rodriguez,52,M,Mexico,Mexico City,Sports,Running Shoes,1,129.99,129.99,Cash on Delivery,Express,2,5,20,SPORT20
+2025-01-07,C006,Yuki Tanaka,25,F,Japan,Tokyo,Beauty,Skincare Set,4,39.99,159.96,Credit Card,Standard,6,4,0,NONE
+2025-01-08,C007,Hans Mueller,38,M,Germany,Berlin,Electronics,Smartphone Samsung,2,799.99,1599.98,PayPal,Express,1,5,5,MOBILE5
+2025-01-08,C008,Sophie Dubois,42,F,France,Paris,Fashion,Designer Handbag,1,449.99,449.99,Credit Card,Express,2,5,0,NONE
+2025-01-09,C009,Ahmed Hassan,29,M,Egypt,Cairo,Home & Garden,Vacuum Cleaner,1,249.99,249.99,Debit Card,Standard,7,3,10,HOME10
+2025-01-09,C010,Isabella Silva,36,F,Brazil,São Paulo,Beauty,Makeup Kit,2,79.99,159.98,Credit Card,Standard,5,4,15,BEAUTY15
+2025-01-10,C011,Raj Patel,41,M,India,Mumbai,Electronics,Tablet iPad,1,599.99,599.99,Credit Card,Express,3,5,0,NONE
+2025-01-10,C012,Olga Ivanova,33,F,Russia,Moscow,Fashion,Winter Coat,1,299.99,299.99,PayPal,Standard,6,4,20,WINTER20
+2025-01-11,C013,David Kim,27,M,South Korea,Seoul,Sports,Fitness Tracker,2,149.99,299.98,Credit Card,Express,2,5,10,FITNESS10
+2025-01-11,C014,Fatima Al-Sayed,39,F,UAE,Dubai,Home & Garden,Coffee Maker,1,89.99,89.99,Debit Card,Standard,4,4,0,NONE
+2025-01-12,C015,Marco Rossi,44,M,Italy,Rome,Electronics,Digital Camera,1,899.99,899.99,Credit Card,Express,1,5,5,PHOTO5
+2025-01-12,C016,Anna Kowalski,30,F,Poland,Warsaw,Beauty,Hair Dryer,3,59.99,179.97,PayPal,Standard,5,4,15,HAIR15
+2025-01-13,C017,Lars Andersen,48,M,Denmark,Copenhagen,Sports,Bicycle,1,699.99,699.99,Credit Card,Express,3,5,0,NONE
+2025-01-13,C018,Priya Sharma,26,F,India,Delhi,Fashion,Ethnic Wear,2,99.99,199.98,Debit Card,Standard,6,4,20,ETHNIC20
+2025-01-14,C019,Tom Brown,35,M,Australia,Sydney,Electronics,Gaming Console,1,499.99,499.99,Credit Card,Express,2,5,10,GAME10
+2025-01-14,C020,Lucia Fernandez,32,F,Argentina,Buenos Aires,Home & Garden,Blender,2,79.99,159.98,PayPal,Standard,7,3,0,NONE
+2025-01-15,C021,Chen Zhang,50,M,China,Shanghai,Electronics,Smart Watch,2,299.99,599.98,Credit Card,Express,1,5,15,SMART15
+2025-01-15,C022,Nina Petrov,28,F,Bulgaria,Sofia,Beauty,Perfume Set,1,129.99,129.99,Debit Card,Standard,5,4,0,NONE
+2025-01-16,C023,Miguel Santos,37,M,Portugal,Lisbon,Sports,Tennis Racket,1,179.99,179.99,Credit Card,Express,2,5,20,TENNIS20
+2025-01-16,C024,Sakura Yamamoto,24,F,Japan,Osaka,Fashion,Casual Shoes,2,69.99,139.98,PayPal,Standard,6,4,10,SHOES10
+2025-01-17,C025,Erik Johansson,46,M,Sweden,Stockholm,Electronics,Laptop Lenovo,1,1099.99,1099.99,Credit Card,Express,3,5,0,NONE
+2025-01-17,C026,Anya Volkov,31,F,Ukraine,Kiev,Home & Garden,Air Purifier,1,199.99,199.99,Debit Card,Standard,4,4,15,AIR15
+2025-01-18,C027,Hassan Ali,43,M,Pakistan,Karachi,Sports,Cricket Bat,3,49.99,149.97,Cash on Delivery,Express,2,5,0,NONE
+2025-01-18,C028,Camila Lopez,29,F,Colombia,Bogotá,Beauty,Nail Polish Set,4,24.99,99.96,Credit Card,Standard,7,3,20,NAILS20
+2025-01-19,C029,Alex Turner,40,M,Canada,Toronto,Electronics,Wireless Speaker,2,149.99,299.98,PayPal,Express,1,5,10,AUDIO10
+2025-01-19,C030,Zara Khan,33,F,Bangladesh,Dhaka,Fashion,Silk Scarf,3,39.99,119.97,Debit Card,Standard,5,4,0,NONE
+2025-01-20,C001,John Smith,34,M,USA,New York,Sports,Yoga Mat,2,29.99,59.98,Credit Card,Standard,4,4,15,YOGA15
+2025-01-20,C015,Marco Rossi,44,M,Italy,Rome,Home & Garden,Espresso Machine,1,349.99,349.99,Credit Card,Express,2,5,0,NONE
+2025-01-21,C007,Hans Mueller,38,M,Germany,Berlin,Electronics,Wireless Keyboard,1,79.99,79.99,PayPal,Standard,6,4,20,TECH20
+2025-01-21,C022,Nina Petrov,28,F,Bulgaria,Sofia,Fashion,Evening Gown,1,199.99,199.99,Credit Card,Express,3,5,0,NONE
+2025-01-22,C011,Raj Patel,41,M,India,Mumbai,Sports,Dumbbells Set,1,89.99,89.99,Debit Card,Standard,5,4,10,GYM10
+2025-01-22,C018,Priya Sharma,26,F,India,Delhi,Beauty,Facial Cream,2,44.99,89.98,Credit Card,Standard,4,4,15,SKIN15
+2025-01-23,C003,Li Wei,45,M,China,Beijing,Electronics,Smart TV 55",1,799.99,799.99,Credit Card,Express,2,5,5,TV5
+2025-01-23,C024,Sakura Yamamoto,24,F,Japan,Osaka,Home & Garden,Rice Cooker,1,129.99,129.99,PayPal,Standard,6,4,0,NONE
+2025-01-24,C019,Tom Brown,35,M,Australia,Sydney,Sports,Surfboard,1,449.99,449.99,Credit Card,Express,1,5,20,SURF20
+2025-01-24,C010,Isabella Silva,36,F,Brazil,São Paulo,Fashion,Swimsuit,2,59.99,119.98,Debit Card,Standard,7,3,10,SWIM10
+2025-01-25,C025,Erik Johansson,46,M,Sweden,Stockholm,Electronics,Bluetooth Earbuds,3,89.99,269.97,Credit Card,Express,2,5,0,NONE
