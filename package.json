@@ -8,7 +8,11 @@
     "lab7:verify": "node ./scripts/lab7-verify.js",
     "lint": "next lint",
     "start": "next start",
-    "labs:dev": "node labs_api/server.js"
+    "labs:dev": "node labs_api/server.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -44,6 +48,7 @@
     "@types/multer": "^2.0.0",
     "@vercel/analytics": "1.3.1",
     "autoprefixer": "^10.4.20",
+    "awilix": "^12.0.5",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
@@ -60,7 +65,7 @@
     "jsonwebtoken": "9.0.2",
     "lucide-react": "^0.454.0",
     "multer": "^2.0.2",
-    "next": "15.2.4",
+    "next": "^15.5.9",
     "next-themes": "latest",
     "prisma": "^6.18.0",
     "react": "^19",
@@ -81,9 +86,12 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }

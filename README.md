@@ -61,6 +61,32 @@ This project includes **11 complete laboratory assignments** covering web applic
 - PostgreSQL 14+
 - pnpm (recommended) or npm
 
+## 📐 Architecture
+
+This application follows a **clean layered architecture** with strict separation of concerns. For a complete understanding of the application flow, see **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
+
+```
+Frontend (React/Next.js)
+  ↓
+Next.js API Routes (/api/*)
+  ↓
+Controllers (HTTP handling)
+  ↓
+Services (Business logic)
+  ↓
+Repositories (Data access)
+  ↓
+Prisma ORM → PostgreSQL
+```
+
+**Key Directories:**
+- `src/server/controllers/` - HTTP request/response handling
+- `src/server/services/` - Business logic & validation
+- `src/server/repositories/` - Database operations
+- `src/app/api/` - Next.js API routes (entry point)
+
+**Documentation:** [Full Architecture Guide →](./ARCHITECTURE.md)
+
 ## ⚙️ Quick Start
 
 For detailed installation instructions, see **[INSTALL.md](./INSTALL.md)**

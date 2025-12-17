@@ -116,8 +116,9 @@ export default function Lab7Page() {
 
           {/* Main Content */}
           <Tabs defaultValue="parser" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="parser">CSV Parser</TabsTrigger>
+              <TabsTrigger value="api">API & Postman</TabsTrigger>
               <TabsTrigger value="analysis">Data Analysis</TabsTrigger>
               <TabsTrigger value="features">Features</TabsTrigger>
             </TabsList>
@@ -254,6 +255,419 @@ export default function Lab7Page() {
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            {/* API & Postman Tab */}
+            <TabsContent value="api" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    RESTful API Testing cu Postman
+                  </CardTitle>
+                  <CardDescription>
+                    Testarea endpoint-urilor API folosind Postman pentru operații CRUD
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-500">
+                    <AlertDescription>
+                      <strong>Postman</strong> este un client API care facilitează testarea, documentarea și dezvoltarea API-urilor RESTful.
+                      <br />
+                      <a href="https://www.postman.com/downloads/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline mt-2 inline-block">
+                        Download Postman →
+                      </a>
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Exercițiu 1: GET Operations */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">📋 Exercițiu 1: Operațiile GET și GET(id)</h3>
+                    
+                    <div className="bg-muted p-4 rounded-lg space-y-3">
+                      <p className="font-semibold">Obiectiv:</p>
+                      <p className="text-sm">Implementați și testați endpoint-urile pentru afișarea tuturor entităților și detalii despre o entitate specifică.</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">GET /api/plans</CardTitle>
+                          <CardDescription>Listează toate planurile</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Request în Postman:</Label>
+                            <div className="bg-slate-950 text-slate-50 p-3 rounded text-xs space-y-2">
+                              <div><span className="text-green-400">Method:</span> GET</div>
+                              <div><span className="text-green-400">URL:</span> http://localhost:4000/api/plans</div>
+                              <div><span className="text-green-400">Headers:</span> None required</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Response (200 OK):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`[
+  {
+    "id": 1,
+    "name": "Free",
+    "price": 0,
+    "maxFiles": 5,
+    "maxDashboards": 2,
+    "maxCharts": 10
+  },
+  {
+    "id": 2,
+    "name": "Pro",
+    "price": 19.99,
+    "maxFiles": 50,
+    "maxDashboards": 10,
+    "maxCharts": 100
+  }
+]`}
+                            </pre>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">GET /api/plans/:id</CardTitle>
+                          <CardDescription>Detalii plan specific</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Request în Postman:</Label>
+                            <div className="bg-slate-950 text-slate-50 p-3 rounded text-xs space-y-2">
+                              <div><span className="text-green-400">Method:</span> GET</div>
+                              <div><span className="text-green-400">URL:</span> http://localhost:4000/api/plans/1</div>
+                              <div><span className="text-green-400">Params:</span> id = 1</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Response (200 OK):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": 1,
+  "name": "Free",
+  "price": 0,
+  "maxFiles": 5,
+  "maxDashboards": 2,
+  "maxCharts": 10,
+  "users": [
+    {
+      "id": 1,
+      "email": "user@example.com",
+      "createdAt": "2025-01-15"
+    }
+  ]
+}`}
+                            </pre>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Exercițiu 2: Model Mapping */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">🔄 Exercițiu 2: Model Mapping (DTO Pattern)</h3>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Data Transfer Objects (DTOs)</CardTitle>
+                        <CardDescription>Separarea modelelor pentru database și API responses</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs font-bold mb-2 block">❌ Database Model (Prisma)</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`// prisma/schema.prisma
+model Plan {
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  price          Decimal  @db.Decimal(10,2)
+  maxFiles       Int?
+  maxDashboards  Int?
+  maxCharts      Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  users User[]
+}`}
+                            </pre>
+                          </div>
+
+                          <div>
+                            <Label className="text-xs font-bold mb-2 block">✅ API Response Model (DTO)</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`// DTO for API response
+interface PlanDTO {
+  id: number;
+  name: string;
+  price: number;
+  limits: {
+    files: number;
+    dashboards: number;
+    charts: number;
+  };
+  userCount: number;
+  isPopular: boolean;
+}
+
+// Mapper function
+function toPlanDTO(plan) {
+  return {
+    id: plan.id,
+    name: plan.name,
+    price: Number(plan.price),
+    limits: {
+      files: plan.maxFiles,
+      dashboards: plan.maxDashboards,
+      charts: plan.maxCharts
+    },
+    userCount: plan._count?.users || 0,
+    isPopular: plan.name === 'Pro'
+  };
+}`}
+                            </pre>
+                          </div>
+                        </div>
+
+                        <Alert>
+                          <AlertDescription>
+                            <strong>Beneficii DTO:</strong> Controlul exact asupra datelor expuse în API, adăugare câmpuri calculate,
+                            ascundere detalii interne database, versioning API independent de schema DB
+                          </AlertDescription>
+                        </Alert>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Exercițiu 3: POST și PUT */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold">✏️ Exercițiu 3: Operațiile POST și PUT</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">POST /api/plans</CardTitle>
+                          <CardDescription>Creare plan nou</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Request în Postman:</Label>
+                            <div className="bg-slate-950 text-slate-50 p-3 rounded text-xs space-y-2">
+                              <div><span className="text-green-400">Method:</span> POST</div>
+                              <div><span className="text-green-400">URL:</span> http://localhost:4000/api/plans</div>
+                              <div><span className="text-green-400">Headers:</span></div>
+                              <div className="ml-4">Content-Type: application/json</div>
+                              <div className="ml-4">Authorization: Bearer {'{token}'}</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Body (JSON - Tab "Body" → "raw" → "JSON"):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "name": "Enterprise",
+  "price": 99.99,
+  "maxFiles": 500,
+  "maxDashboards": 50,
+  "maxCharts": 1000
+}`}
+                            </pre>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Response (201 Created):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": 3,
+  "name": "Enterprise",
+  "price": 99.99,
+  "maxFiles": 500,
+  "maxDashboards": 50,
+  "maxCharts": 1000,
+  "createdAt": "2025-12-10T10:30:00Z"
+}`}
+                            </pre>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">PUT /api/plans/:id</CardTitle>
+                          <CardDescription>Actualizare plan existent</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Request în Postman:</Label>
+                            <div className="bg-slate-950 text-slate-50 p-3 rounded text-xs space-y-2">
+                              <div><span className="text-green-400">Method:</span> PUT</div>
+                              <div><span className="text-green-400">URL:</span> http://localhost:4000/api/plans/3</div>
+                              <div><span className="text-green-400">Headers:</span></div>
+                              <div className="ml-4">Content-Type: application/json</div>
+                              <div className="ml-4">Authorization: Bearer {'{token}'}</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Body (JSON):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "price": 89.99,
+  "maxFiles": 1000
+}`}
+                            </pre>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Response (200 OK):</Label>
+                            <pre className="bg-slate-950 text-slate-50 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": 3,
+  "name": "Enterprise",
+  "price": 89.99,
+  "maxFiles": 1000,
+  "maxDashboards": 50,
+  "maxCharts": 1000,
+  "updatedAt": "2025-12-10T11:00:00Z"
+}`}
+                            </pre>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Postman Collection Guide */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>📁 Ghid Postman: Crearea unei Colecții</CardTitle>
+                      <CardDescription>Organizarea endpoint-urilor în Postman Collections</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ol className="space-y-3 text-sm">
+                        <li className="flex gap-3">
+                          <Badge variant="outline" className="shrink-0">1</Badge>
+                          <div>
+                            <strong>Creați o Collection nouă:</strong> Click pe "New" → "Collection" → Nume: "DataInsight API"
+                          </div>
+                        </li>
+                        <li className="flex gap-3">
+                          <Badge variant="outline" className="shrink-0">2</Badge>
+                          <div>
+                            <strong>Adăugați Environment Variables:</strong> Click pe "Environments" → "Create Environment"
+                            <pre className="bg-slate-950 text-slate-50 p-2 rounded text-xs mt-2">
+{`Variable: baseUrl
+Initial Value: http://localhost:4000
+Current Value: http://localhost:4000`}
+                            </pre>
+                          </div>
+                        </li>
+                        <li className="flex gap-3">
+                          <Badge variant="outline" className="shrink-0">3</Badge>
+                          <div>
+                            <strong>Creați Requests:</strong> În collection, click "Add Request" → Configurați:
+                            <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
+                              <li>URL: {'{{baseUrl}}'}/api/plans</li>
+                              <li>Method: GET, POST, PUT, DELETE</li>
+                              <li>Headers: Content-Type, Authorization</li>
+                              <li>Body: JSON pentru POST/PUT</li>
+                            </ul>
+                          </div>
+                        </li>
+                        <li className="flex gap-3">
+                          <Badge variant="outline" className="shrink-0">4</Badge>
+                          <div>
+                            <strong>Salvați Responses:</strong> Click "Save Response" → "Save as Example" pentru documentație
+                          </div>
+                        </li>
+                        <li className="flex gap-3">
+                          <Badge variant="outline" className="shrink-0">5</Badge>
+                          <div>
+                            <strong>Export Collection:</strong> Click "..." pe collection → "Export" → Format: Collection v2.1
+                          </div>
+                        </li>
+                      </ol>
+
+                      <Alert className="bg-green-50 dark:bg-green-950 border-green-500">
+                        <AlertDescription>
+                          <strong>Pro Tip:</strong> Folosiți Postman Tests (tab "Tests") pentru automatizarea validărilor:
+                          <pre className="bg-slate-950 text-slate-50 p-2 rounded text-xs mt-2">
+{`pm.test("Status code is 200", function () {
+  pm.response.to.have.status(200);
+});
+
+pm.test("Response has plans array", function () {
+  pm.expect(pm.response.json()).to.be.an('array');
+});`}
+                          </pre>
+                        </AlertDescription>
+                      </Alert>
+                    </CardContent>
+                  </Card>
+
+                  {/* Error Responses */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>⚠️ Error Responses - HTTP Status Codes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-4 text-sm">
+                        <div className="space-y-2">
+                          <div className="font-bold text-red-600 dark:text-red-400">Client Errors (4xx)</div>
+                          <div className="space-y-2">
+                            <div className="bg-red-50 dark:bg-red-950 p-2 rounded">
+                              <div className="font-semibold">400 Bad Request</div>
+                              <div className="text-xs text-muted-foreground">Invalid JSON sau missing required fields</div>
+                              <pre className="text-xs mt-1">{'{"error": "Name is required"}'}</pre>
+                            </div>
+                            <div className="bg-red-50 dark:bg-red-950 p-2 rounded">
+                              <div className="font-semibold">401 Unauthorized</div>
+                              <div className="text-xs text-muted-foreground">Missing sau invalid JWT token</div>
+                              <pre className="text-xs mt-1">{'{"error": "Authentication required"}'}</pre>
+                            </div>
+                            <div className="bg-red-50 dark:bg-red-950 p-2 rounded">
+                              <div className="font-semibold">404 Not Found</div>
+                              <div className="text-xs text-muted-foreground">Resource cu ID-ul specificat nu există</div>
+                              <pre className="text-xs mt-1">{'{"error": "Plan not found"}'}</pre>
+                            </div>
+                            <div className="bg-red-50 dark:bg-red-950 p-2 rounded">
+                              <div className="font-semibold">409 Conflict</div>
+                              <div className="text-xs text-muted-foreground">Duplicate entry (ex: plan name exists)</div>
+                              <pre className="text-xs mt-1">{'{"error": "Plan name already exists"}'}</pre>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="font-bold text-orange-600 dark:text-orange-400">Server Errors (5xx)</div>
+                          <div className="space-y-2">
+                            <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded">
+                              <div className="font-semibold">500 Internal Server Error</div>
+                              <div className="text-xs text-muted-foreground">Uncaught exception în server</div>
+                              <pre className="text-xs mt-1">{'{"error": "Internal server error"}'}</pre>
+                            </div>
+                            <div className="bg-orange-50 dark:bg-orange-950 p-2 rounded">
+                              <div className="font-semibold">503 Service Unavailable</div>
+                              <div className="text-xs text-muted-foreground">Database connection failed</div>
+                              <pre className="text-xs mt-1">{'{"error": "Database unavailable"}'}</pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Analysis Tab */}
