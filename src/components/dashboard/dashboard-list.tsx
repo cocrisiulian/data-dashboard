@@ -24,7 +24,11 @@ type DashboardWithCharts = {
   name: string
   description: string | null
   created_at: string
-  charts: { count: number }[]
+  charts?: Array<{
+    id: string
+    title: string
+    chart_type: string
+  }>
 }
 
 export function DashboardList({
@@ -96,7 +100,7 @@ export function DashboardList({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <BarChart3 className="h-4 w-4" />
-                <span>{dashboard.charts[0]?.count || 0} charts</span>
+                <span>{dashboard.charts?.length || 0} charts</span>
               </div>
               <Link href={`/dashboard/${dashboard.id}`}>
                 <Button size="sm">View</Button>
