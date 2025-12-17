@@ -6,11 +6,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PlanService } from '@/server/services/PlanService';
 import { PlanRepository } from '@/server/repositories/PlanRepository';
+import { ICache } from '@/server/infrastructure/cache/ICache';
 import { mockPlans } from '@/__tests__/fixtures/data';
 
 describe('PlanService', () => {
   let planService: PlanService;
   let mockPlanRepository: PlanRepository;
+  let mockCacheManager: ICache;
 
   beforeEach(() => {
     // Create mock repository
@@ -23,7 +25,17 @@ describe('PlanService', () => {
       delete: vi.fn(),
     } as any;
 
-    planService = new PlanService(mockPlanRepository);
+    // Create mock cache manager
+    mockCacheManager = {
+      get: vi.fn(),
+      set: vi.fn(),
+      isSet: vi.fn().mockReturnValue(false),
+      remove: vi.fn(),
+      removeByPattern: vi.fn(),
+      clear: vi.fn(),
+    } as any;
+
+    planService = new PlanService(mockPlanRepository, mockCacheManager);
   });
 
   describe('getAllPlans', () => {

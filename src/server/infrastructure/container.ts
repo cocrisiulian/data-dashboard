@@ -35,6 +35,10 @@ import { FileController } from '../controllers/FileController';
 import { ChartController } from '../controllers/ChartController';
 import { DashboardController } from '../controllers/DashboardController';
 
+// Infrastructure
+import { MemoryCacheService } from './cache/MemoryCacheService';
+import { ICache } from './cache/ICache';
+
 /**
  * Create și configure DI container
  *
@@ -60,6 +64,15 @@ export function createDIContainer(): AwilixContainer {
     chartRepository: asClass(ChartRepository).singleton(),
     dashboardRepository: asClass(DashboardRepository).singleton(),
     userRepository: asClass(UserRepository).singleton()
+  });
+
+  // ========================================
+  // INFRASTRUCTURE (SINGLETON)
+  // ========================================
+  // Cache service - singleton pentru shared cache între toate requesturile
+
+  container.register({
+    cacheManager: asClass(MemoryCacheService).singleton()
   });
 
   // ========================================

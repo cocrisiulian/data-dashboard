@@ -8,6 +8,7 @@
 import { FileRepository } from '../repositories/FileRepository';
 import { UserRepository } from '../repositories/UserRepository';
 import { File } from '@prisma/client';
+import { ICache } from '../infrastructure/cache/ICache';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -23,36 +24,73 @@ export interface FileDTO extends File {
 export class FileService {
   private fileRepository: FileRepository;
   private userRepository: UserRepository;
+  private cacheManager: ICache;
 
   constructor(
     fileRepository: FileRepository,
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    cacheManager: ICache
   ) {
     this.fileRepository = fileRepository;
     this.userRepository = userRepository;
+    this.cacheManager = cacheManager;
   }
 
   /**
    * Get all files pentru user cu transformare snake_case
+   * Cache: files-user-{userId} pentru 1 oră
    */
   async getAllFiles(userId: string): Promise<FileDTO[]> {
+    const cacheKey = `files-user-${userId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedFiles = this.cacheManager.get<FileDTO[]>(cacheKey);
+      if (cachedFiles) {
+        return cachedFiles;
+      }
+    }
+    
+    // Get from database
     const files = await this.fileRepository.findAllByUserId(userId);
     
     // Transform la snake_case pentru frontend compatibility
-    return files.map((file: File) => this.toDTO(file));
+    const fileDTOs = files.map((file: File) => this.toDTO(file));
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, fileDTOs);
+    
+    return fileDTOs;
   }
 
   /**
    * Get single file cu ownership validation
+   * Cache: file-{fileId} pentru 1 oră
    */
   async getFileById(fileId: string, userId: string): Promise<FileDTO> {
+    const cacheKey = `file-${fileId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedFile = this.cacheManager.get<FileDTO>(cacheKey);
+      if (cachedFile) {
+        return cachedFile;
+      }
+    }
+    
+    // Get from database
     const file = await this.fileRepository.findByIdAndUserId(fileId, userId);
     
     if (!file) {
       throw new Error('File not found');
     }
 
-    return this.toDTO(file);
+    const fileDTO = this.toDTO(file);
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, fileDTO);
+    
+    return fileDTO;
   }
 
   /**
@@ -95,6 +133,9 @@ export class FileService {
       fileType: fileData.mimetype
     });
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern(`file`);
+
     console.log(`[FILE SERVICE] File uploaded: ${file.fileName} (User: ${userId})`);
 
     return this.toDTO(file);
@@ -124,6 +165,9 @@ export class FileService {
 
     // Delete from database
     await this.fileRepository.delete(fileId);
+
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern(`file`);
 
     console.log(`[FILE SERVICE] File deleted: ${file.fileName} (ID: ${fileId})`);
   }
@@ -159,4 +203,7 @@ export class FileService {
 // Export singleton
 import { fileRepository } from '../repositories/FileRepository';
 import { userRepository } from '../repositories/UserRepository';
-export const fileService = new FileService(fileRepository, userRepository);
+import { MemoryCacheService } from '../infrastructure/cache/MemoryCacheService';
+
+const cacheManager = new MemoryCacheService();
+export const fileService = new FileService(fileRepository, userRepository, cacheManager);

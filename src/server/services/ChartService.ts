@@ -7,6 +7,7 @@ import { ChartRepository } from '../repositories/ChartRepository';
 import { DashboardRepository } from '../repositories/DashboardRepository';
 import { UserRepository } from '../repositories/UserRepository';
 import { Chart } from '@prisma/client';
+import { ICache } from '../infrastructure/cache/ICache';
 
 export interface ChartDTO {
   id: string;
@@ -28,21 +29,35 @@ export class ChartService {
   private chartRepository: ChartRepository;
   private dashboardRepository: DashboardRepository;
   private userRepository: UserRepository;
+  private cacheManager: ICache;
 
   constructor(
     chartRepository: ChartRepository,
     dashboardRepository: DashboardRepository,
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    cacheManager: ICache
   ) {
     this.chartRepository = chartRepository;
     this.dashboardRepository = dashboardRepository;
     this.userRepository = userRepository;
+    this.cacheManager = cacheManager;
   }
 
   /**
    * Get all charts pentru dashboard cu ownership validation
+   * Cache: charts-dashboard-{dashboardId} pentru 1 oră
    */
   async getChartsByDashboardId(dashboardId: string, userId: string): Promise<ChartDTO[]> {
+    const cacheKey = `charts-dashboard-${dashboardId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedCharts = this.cacheManager.get<ChartDTO[]>(cacheKey);
+      if (cachedCharts) {
+        return cachedCharts;
+      }
+    }
+    
     // Business validation: Verify dashboard ownership
     const dashboard = await this.dashboardRepository.findByIdAndUserId(dashboardId, userId);
     
@@ -52,13 +67,29 @@ export class ChartService {
 
     const charts = await this.chartRepository.findAllByDashboardId(dashboardId);
     
-    return charts.map((chart: Chart) => this.toDTO(chart));
+    const chartDTOs = charts.map((chart: Chart) => this.toDTO(chart));
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, chartDTOs);
+    
+    return chartDTOs;
   }
 
   /**
    * Get single chart cu ownership validation
+   * Cache: chart-{chartId} pentru 1 oră
    */
   async getChartById(chartId: string, userId: string): Promise<ChartDTO> {
+    const cacheKey = `chart-${chartId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedChart = this.cacheManager.get<ChartDTO>(cacheKey);
+      if (cachedChart) {
+        return cachedChart;
+      }
+    }
+    
     const chart = await this.chartRepository.findById(chartId);
     
     if (!chart) {
@@ -70,7 +101,12 @@ export class ChartService {
       throw new Error('Access denied');
     }
 
-    return this.toDTO(chart);
+    const chartDTO = this.toDTO(chart);
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, chartDTO);
+    
+    return chartDTO;
   }
 
   /**
@@ -110,6 +146,9 @@ export class ChartService {
 
     const chart = await this.chartRepository.create(chartData);
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('chart');
+
     console.log(`[CHART SERVICE] Chart created: ${chart.title} (Dashboard: ${chartData.dashboardId})`);
 
     return this.toDTO(chart);
@@ -141,6 +180,9 @@ export class ChartService {
 
     const updatedChart = await this.chartRepository.update(chartId, updateData);
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('chart');
+
     console.log(`[CHART SERVICE] Chart updated: ${updatedChart.title} (ID: ${chartId})`);
 
     return this.toDTO(updatedChart);
@@ -162,6 +204,9 @@ export class ChartService {
     }
 
     await this.chartRepository.delete(chartId);
+
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('chart');
 
     console.log(`[CHART SERVICE] Chart deleted: ${chart.title} (ID: ${chartId})`);
   }
@@ -192,4 +237,7 @@ export class ChartService {
 import { chartRepository } from '../repositories/ChartRepository';
 import { dashboardRepository } from '../repositories/DashboardRepository';
 import { userRepository } from '../repositories/UserRepository';
-export const chartService = new ChartService(chartRepository, dashboardRepository, userRepository);
+import { MemoryCacheService } from '../infrastructure/cache/MemoryCacheService';
+
+const cacheManager = new MemoryCacheService();
+export const chartService = new ChartService(chartRepository, dashboardRepository, userRepository, cacheManager);

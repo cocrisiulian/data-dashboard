@@ -6,6 +6,7 @@
 import { DashboardRepository } from '../repositories/DashboardRepository';
 import { UserRepository } from '../repositories/UserRepository';
 import { Dashboard } from '@prisma/client';
+import { ICache } from '../infrastructure/cache/ICache';
 
 export interface DashboardDTO {
   id: string;
@@ -34,35 +35,70 @@ export interface DashboardDTO {
 export class DashboardService {
   private dashboardRepository: DashboardRepository;
   private userRepository: UserRepository;
+  private cacheManager: ICache;
 
   constructor(
     dashboardRepository: DashboardRepository,
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    cacheManager: ICache
   ) {
     this.dashboardRepository = dashboardRepository;
     this.userRepository = userRepository;
+    this.cacheManager = cacheManager;
   }
 
   /**
    * Get all dashboards pentru user
+   * Cache: dashboards-user-{userId} pentru 1 oră
    */
   async getAllDashboards(userId: string): Promise<DashboardDTO[]> {
+    const cacheKey = `dashboards-user-${userId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedDashboards = this.cacheManager.get<DashboardDTO[]>(cacheKey);
+      if (cachedDashboards) {
+        return cachedDashboards;
+      }
+    }
+    
     const dashboards = await this.dashboardRepository.findAllByUserId(userId);
     
-    return dashboards.map((dashboard: Dashboard) => this.toDTO(dashboard));
+    const dashboardDTOs = dashboards.map((dashboard: Dashboard) => this.toDTO(dashboard));
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, dashboardDTOs);
+    
+    return dashboardDTOs;
   }
 
   /**
    * Get single dashboard cu ownership validation
+   * Cache: dashboard-{dashboardId} pentru 1 oră
    */
   async getDashboardById(dashboardId: string, userId: string): Promise<DashboardDTO> {
+    const cacheKey = `dashboard-${dashboardId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedDashboard = this.cacheManager.get<DashboardDTO>(cacheKey);
+      if (cachedDashboard) {
+        return cachedDashboard;
+      }
+    }
+    
     const dashboard = await this.dashboardRepository.findByIdAndUserId(dashboardId, userId);
     
     if (!dashboard) {
       throw new Error('Dashboard not found');
     }
 
-    return this.toDTO(dashboard);
+    const dashboardDTO = this.toDTO(dashboard);
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, dashboardDTO);
+    
+    return dashboardDTO;
   }
 
   /**
@@ -95,6 +131,9 @@ export class DashboardService {
       description: dashboardData.description
     });
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('dashboard');
+
     console.log(`[DASHBOARD SERVICE] Dashboard created: ${dashboard.name} (User: ${userId})`);
 
     return this.toDTO(dashboard);
@@ -119,6 +158,9 @@ export class DashboardService {
 
     const updatedDashboard = await this.dashboardRepository.update(dashboardId, updateData);
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('dashboard');
+
     console.log(`[DASHBOARD SERVICE] Dashboard updated: ${updatedDashboard.name} (ID: ${dashboardId})`);
 
     return this.toDTO(updatedDashboard);
@@ -137,6 +179,10 @@ export class DashboardService {
 
     // Prisma cascade delete va șterge automat toate charts
     await this.dashboardRepository.delete(dashboardId);
+
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('dashboard');
+    this.cacheManager.removeByPattern('chart'); // Also invalidate charts cache
 
     console.log(`[DASHBOARD SERVICE] Dashboard deleted: ${dashboard.name} (ID: ${dashboardId})`);
   }
@@ -179,4 +225,7 @@ export class DashboardService {
 // Export singleton
 import { dashboardRepository } from '../repositories/DashboardRepository';
 import { userRepository } from '../repositories/UserRepository';
-export const dashboardService = new DashboardService(dashboardRepository, userRepository);
+import { MemoryCacheService } from '../infrastructure/cache/MemoryCacheService';
+
+const cacheManager = new MemoryCacheService();
+export const dashboardService = new DashboardService(dashboardRepository, userRepository, cacheManager);

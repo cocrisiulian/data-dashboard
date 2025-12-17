@@ -17,6 +17,7 @@
 
 import { PlanRepository, PlanWithCount } from '../repositories/PlanRepository';
 import { Plan } from '@prisma/client';
+import { ICache } from '../infrastructure/cache/ICache';
 
 export interface PlanDTO extends Plan {
   isPopular?: boolean;
@@ -31,40 +32,72 @@ export interface PlanDTO extends Plan {
 
 export class PlanService {
   private planRepository: PlanRepository;
+  private cacheManager: ICache;
 
   /**
    * Constructor cu Dependency Injection
    * @param planRepository - Injectat pentru testability și loose coupling
+   * @param cacheManager - Cache service pentru performance optimization
    */
-  constructor(planRepository: PlanRepository) {
+  constructor(planRepository: PlanRepository, cacheManager: ICache) {
     this.planRepository = planRepository;
+    this.cacheManager = cacheManager;
   }
 
   /**
    * Get all plans cu business logic
    * Business Rule: Add computed fields (isPopular, valueScore)
+   * Cache: plans-all pentru 1 oră (3600 seconds)
    * 
    * Folosit în: GET /api/plans
    */
   async getAllPlans(): Promise<PlanDTO[]> {
+    const cacheKey = 'plans-all';
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedPlans = this.cacheManager.get<PlanDTO[]>(cacheKey);
+      if (cachedPlans) {
+        return cachedPlans;
+      }
+    }
+    
+    // Get from database
     const plans = await this.planRepository.findAll();
     
     // Business logic: Add computed properties
-    return plans.map((plan: PlanWithCount) => ({
+    const plansWithMetadata = plans.map((plan: PlanWithCount) => ({
       ...plan,
       isPopular: (plan._count?.users || 0) > 10, // Business rule
       valueScore: this.calculateValueScore(plan), // Business calculation
       displayName: `${plan.name} Plan` // Business formatting
     }));
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, plansWithMetadata);
+    
+    return plansWithMetadata;
   }
 
   /**
    * Get plan by ID cu validation
    * Business Rule: Validate plan exists
+   * Cache: plan-{id} pentru 1 oră
    * 
    * Folosit în: GET /api/plans/:id
    */
   async getPlanById(planId: string): Promise<PlanDTO> {
+    const cacheKey = `plan-${planId}`;
+    
+    // Try cache first
+    if (this.cacheManager.isSet(cacheKey)) {
+      const cachedPlan = this.cacheManager.get<PlanDTO>(cacheKey);
+      if (cachedPlan) {
+        return cachedPlan;
+      }
+    }
+    
+    // Get from database
     const plan = await this.planRepository.findById(planId);
     
     if (!plan) {
@@ -72,11 +105,16 @@ export class PlanService {
     }
 
     // Add business context
-    return {
+    const planWithMetadata = {
       ...plan,
       canDelete: (plan._count?.users || 0) === 0,
       upgradeRecommendation: this.getUpgradeRecommendation(plan)
     };
+    
+    // Store in cache
+    this.cacheManager.set(cacheKey, planWithMetadata);
+    
+    return planWithMetadata;
   }
 
   /**
@@ -113,6 +151,9 @@ export class PlanService {
 
     // Create plan
     const newPlan = await this.planRepository.create(planData);
+
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('plan');
 
     // Business event logging
     console.log(`[BUSINESS EVENT] Plan created: ${newPlan.name} (ID: ${newPlan.id})`);
@@ -161,6 +202,9 @@ export class PlanService {
 
     const updatedPlan = await this.planRepository.update(planId, updateData);
 
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('plan');
+
     console.log(`[BUSINESS EVENT] Plan updated: ${updatedPlan.name}`);
 
     return updatedPlan;
@@ -188,6 +232,9 @@ export class PlanService {
     }
 
     await this.planRepository.delete(planId);
+
+    // Invalidate cache on mutation
+    this.cacheManager.removeByPattern('plan');
 
     console.log(`[BUSINESS EVENT] Plan deleted: ${plan.name} (ID: ${planId})`);
   }
@@ -281,4 +328,7 @@ export class PlanService {
 
 // Export singleton instance pentru production usage
 import { planRepository } from '../repositories/PlanRepository';
-export const planService = new PlanService(planRepository);
+import { MemoryCacheService } from '../infrastructure/cache/MemoryCacheService';
+
+const cacheManager = new MemoryCacheService();
+export const planService = new PlanService(planRepository, cacheManager);
