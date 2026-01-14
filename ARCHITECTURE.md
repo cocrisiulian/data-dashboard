@@ -55,13 +55,24 @@
 │                                                                 │
 │  Responsabilități:                                              │
 │  • Business logic și validări                                   │
+│  • Cache management (node-cache)                                │
 │  • Plan limit checks (max_files, max_charts)                    │
 │  • Ownership validation                                         │
 │  • Calcule și transformări                                      │
 │  • Orchestrare între repositories                               │
 │  • DTO transformations (snake_case)                             │
+│  • Cache invalidation pe CREATE/UPDATE/DELETE                   │
 └─────────────────────────────────────────────────────────────────┘
-                                ↓
+                    ↓                          ↓
+          ┌─────────────────┐      ┌─────────────────┐
+          │  MEMORY CACHE   │      │   REPOSITORIES  │
+          │  (node-cache)   │      │  (Data Access)  │
+          │                 │      │                 │
+          │  • Get cached   │      │  • Prisma ORM   │
+          │  • Set cache    │      │  • CRUD ops     │
+          │  • Invalidate   │      │  • Queries      │
+          └─────────────────┘      └─────────────────┘
+                                            ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                  REPOSITORIES (Data Access Layer)               │
 │  src/server/repositories/FileRepository.ts                      │
@@ -106,7 +117,7 @@ src/
 ├── server/                       # ⭐ Backend MVC Architecture
 │   ├── controllers/              # HTTP Layer
 │   │   ├── PlanController.ts
-│   │   ├── FileController.ts     # (TODO: create next)
+│   │   ├── FileController.ts
 │   │   ├── ChartController.ts
 │   │   └── DashboardController.ts
 │   │
@@ -123,8 +134,12 @@ src/
 │   │   ├── DashboardRepository.ts
 │   │   └── UserRepository.ts
 │   │
-│   └── infrastructure/           # Dependency Injection
-│       └── container.ts          # Awilix DI Container
+│   └── infrastructure/           # Cross-cutting Concerns
+│       ├── container.ts          # Awilix DI Container
+│       └── cache/                # Memory Cache System
+│           ├── ICache.ts         # Cache interface
+│           ├── MemoryCacheService.ts  # node-cache implementation
+│           └── index.ts          # Exports
 │
 ├── components/                   # React Components
 │   ├── dashboard/
@@ -247,10 +262,47 @@ export class FileService {
 **Responsabilități:**
 
 - **Business logic** (plan limits, validări)
+- **Cache management** (get, set, invalidate)
 - DTO transformations (camelCase → snake_case)
 - Orchestrare între multiple repositories
 - Business events logging
 - **NO database queries direct**
+
+**Example with Cache:**
+
+```typescript
+// src/server/services/FileService.ts
+export class FileService {
+  constructor(
+    private fileRepository: FileRepository,
+    private cacheManager: ICache
+  ) {}
+
+  async getAllFiles(userId: string): Promise<FileDTO[]> {
+    // Try cache first
+    const cacheKey = `files-user-${userId}`;
+    const cached = this.cacheManager.get<FileDTO[]>(cacheKey);
+    if (cached) return cached;
+  
+    // Cache miss - query database
+    const files = await this.fileRepository.findAllByUserId(userId);
+    const dtos = files.map(file => this.toDTO(file));
+  
+    // Store in cache for 1 hour
+    this.cacheManager.set(cacheKey, dtos);
+    return dtos;
+  }
+
+  async uploadFile(userId: string, fileData: any): Promise<FileDTO> {
+    const file = await this.fileRepository.create({...});
+  
+    // Invalidate cache after mutation
+    this.cacheManager.removeByPattern('file');
+  
+    return this.toDTO(file);
+  }
+}
+```
 
 ---
 
@@ -336,16 +388,26 @@ export class FileRepository {
 
 ```typescript
 import { createContainer, asClass } from 'awilix';
+import { MemoryCacheService } from './cache/MemoryCacheService';
 
 const container = createContainer();
 
 container.register({
+  // Infrastructure (SINGLETON)
+  cacheManager: asClass(MemoryCacheService).singleton(),
+  
   // Repositories (SINGLETON - stateless)
   fileRepository: asClass(FileRepository).singleton(),
   userRepository: asClass(UserRepository).singleton(),
+  planRepository: asClass(PlanRepository).singleton(),
+  chartRepository: asClass(ChartRepository).singleton(),
+  dashboardRepository: asClass(DashboardRepository).singleton(),
   
-  // Services (SINGLETON - stateless)
+  // Services (SINGLETON - with cache injection)
   fileService: asClass(FileService).singleton(),
+  planService: asClass(PlanService).singleton(),
+  chartService: asClass(ChartService).singleton(),
+  dashboardService: asClass(DashboardService).singleton(),
   
   // Controllers (SCOPED - per request)
   fileController: asClass(FileController).scoped()
@@ -376,6 +438,7 @@ export const resolveDependency = <T>(name: string): T => {
 | **LAB10** | `LABORATOR_PREDARE/LAB10/cod_sursa/services/PlanService.js`        | `src/server/services/PlanService.ts`        | Plan business logic |
 | **LAB10** | `LABORATOR_PREDARE/LAB10/cod_sursa/repositories/PlanRepository.js` | `src/server/repositories/PlanRepository.ts` | Plan data access    |
 | **LAB10** | `LABORATOR_PREDARE/LAB10/cod_sursa/infrastructure/container.js`    | `src/server/infrastructure/container.ts`    | DI Container        |
+| **LAB12** | Lab12 implementation (code in production)                            | `src/server/infrastructure/cache/`          | Memory Cache System |
 
 ### ⚠️ IMPORTANT: Diferența între `labs_api/` și `src/server/`
 

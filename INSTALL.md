@@ -7,6 +7,7 @@ Complete step-by-step installation and setup guide for DataInsight Dashboard on 
 Before starting, ensure you have these installed:
 
 ### 1. **Node.js** v18.x or higher
+
 - **Download:** [https://nodejs.org](https://nodejs.org)
 - **Verify installation:**
   ```bash
@@ -16,6 +17,7 @@ Before starting, ensure you have these installed:
 - Required version: `v18.0.0` or higher
 
 ### 2. **PostgreSQL** v14.x or higher
+
 - **Download:** [https://www.postgresql.org/download/](https://www.postgresql.org/download/)
 - **Verify installation:**
   ```bash
@@ -24,6 +26,7 @@ Before starting, ensure you have these installed:
 - During installation, remember your PostgreSQL password
 
 ### 3. **Git** (for cloning repository)
+
 - **Download:** [https://git-scm.com/](https://git-scm.com/)
 - **Verify installation:**
   ```bash
@@ -31,6 +34,7 @@ Before starting, ensure you have these installed:
   ```
 
 ### 4. **Package Manager**
+
 - **npm** (comes with Node.js) or **pnpm** (recommended)
 - **Install pnpm** (optional but faster):
   ```bash
@@ -60,6 +64,7 @@ pnpm install
 ```
 
 **What gets installed:**
+
 - Frontend dependencies (Next.js, React, Tailwind)
 - Backend dependencies (Express, Prisma, JWT)
 - Development tools (TypeScript, ESLint)
@@ -69,6 +74,7 @@ pnpm install
 #### 3.1 Create Database
 
 **Windows (using psql command line):**
+
 ```cmd
 # Connect to PostgreSQL
 psql -U postgres
@@ -85,6 +91,7 @@ GRANT ALL PRIVILEGES ON DATABASE datainsight_dashboard TO datainsight_user;
 ```
 
 **macOS/Linux:**
+
 ```bash
 # Create database
 createdb datainsight_dashboard
@@ -96,6 +103,7 @@ psql -U postgres -c "CREATE DATABASE datainsight_dashboard;"
 #### 3.2 Run Database Setup Scripts
 
 **Option A - Consolidated Setup (Recommended):**
+
 ```bash
 # Navigate to scripts directory
 cd scripts/DB
@@ -108,6 +116,7 @@ psql -U postgres -d datainsight_dashboard -f verify-setup.sql
 ```
 
 **Option B - Individual Scripts:**
+
 ```bash
 cd scripts/DB
 
@@ -119,6 +128,7 @@ psql -U postgres -d datainsight_dashboard -f 03-insert-plans.sql
 ```
 
 **What this creates:**
+
 - Users table (with authentication)
 - Plans table (Free, Pro, Enterprise)
 - Files table (uploaded CSV files)
@@ -166,6 +176,7 @@ LOG_LEVEL=info
 ```
 
 **⚠️ Important:**
+
 - Replace `your_password` with your PostgreSQL password
 - Change `JWT_SECRET` to a secure random string (use 32+ characters)
 - Keep `.env` file secure - never commit to Git
@@ -195,6 +206,7 @@ node prisma/seed.js
 ```
 
 **What this adds:**
+
 - Default subscription plans (Free, Pro, Enterprise)
 - Sample user account for testing
 
@@ -206,6 +218,7 @@ mkdir -p labs_api/uploads
 ```
 
 **For Windows:**
+
 ```cmd
 mkdir labs_api\uploads
 ```
@@ -219,12 +232,14 @@ mkdir labs_api\uploads
 You need **TWO terminals** running simultaneously:
 
 #### Terminal 1 - Backend API Server
+
 ```bash
 cd labs_api
 node server.js
 ```
 
 **Expected output:**
+
 ```
 Server running on port 4000
 Database connected
@@ -233,6 +248,7 @@ Database connected
 **Backend is available at:** `http://localhost:4000`
 
 #### Terminal 2 - Frontend Next.js Server
+
 ```bash
 # From project root
 npm run dev
@@ -242,6 +258,7 @@ pnpm dev
 ```
 
 **Expected output:**
+
 ```
 ✓ Ready in 2.5s
 Local: http://localhost:3000
@@ -282,6 +299,7 @@ psql -U postgres -d datainsight_dashboard
 ### 2. Test Backend API
 
 **Using curl (Linux/Mac):**
+
 ```bash
 # Health check
 curl http://localhost:4000/health
@@ -291,6 +309,7 @@ curl http://localhost:4000/api/plans
 ```
 
 **Using PowerShell (Windows):**
+
 ```powershell
 # Health check
 Invoke-WebRequest http://localhost:4000/health
@@ -304,6 +323,7 @@ Invoke-WebRequest http://localhost:4000/api/plans
 ### 3. Test Frontend
 
 Open browser and navigate to:
+
 - **Homepage:** `http://localhost:3000`
 - **Login:** `http://localhost:3000/login`
 - **Register:** `http://localhost:3000/register`
@@ -326,6 +346,7 @@ Open browser and navigate to:
 **Error:** `connection refused` or `database does not exist`
 
 **Solutions:**
+
 ```bash
 # Check PostgreSQL is running
 # Windows (Services):
@@ -349,6 +370,7 @@ sudo systemctl start postgresql
 **Error:** `Port 3000 is already in use`
 
 **Solutions:**
+
 ```bash
 # Find process using port
 # Windows:
@@ -367,6 +389,7 @@ lsof -ti:3000 | xargs kill -9
 **Error:** `@prisma/client did not initialize yet`
 
 **Solutions:**
+
 ```bash
 # Regenerate Prisma Client
 npx prisma generate
@@ -383,6 +406,7 @@ npx prisma generate
 **Error:** `ENOENT: no such file or directory, open './labs_api/uploads/...'`
 
 **Solution:**
+
 ```bash
 # Create uploads directory
 mkdir -p labs_api/uploads
@@ -398,6 +422,7 @@ chmod 755 labs_api/uploads
 **Error:** `invalid signature` or `jwt malformed`
 
 **Solutions:**
+
 - Clear browser localStorage: `localStorage.clear()` in console
 - Verify JWT_SECRET is set in `.env`
 - Ensure JWT_SECRET is the same value used when token was created
@@ -407,6 +432,7 @@ chmod 755 labs_api/uploads
 **Error:** `Migration failed` or `schema mismatch`
 
 **Solutions:**
+
 ```bash
 # Reset database (WARNING: deletes all data)
 npx prisma migrate reset
@@ -422,12 +448,14 @@ npx prisma generate
 ## 📚 Additional Resources
 
 ### Documentation
+
 - **Prisma ORM:** [https://www.prisma.io/docs](https://www.prisma.io/docs)
 - **Next.js:** [https://nextjs.org/docs](https://nextjs.org/docs)
 - **PostgreSQL:** [https://www.postgresql.org/docs](https://www.postgresql.org/docs)
 - **Express.js:** [https://expressjs.com/](https://expressjs.com/)
 
 ### Tools
+
 - **Prisma Studio:** Visual database browser - `npx prisma studio`
 - **Postman:** API testing - [https://www.postman.com/](https://www.postman.com/)
 - **pgAdmin:** PostgreSQL GUI - [https://www.pgadmin.org/](https://www.pgadmin.org/)
@@ -435,6 +463,7 @@ npx prisma generate
 ### Test Credentials
 
 After running seed script, use:
+
 ```
 Email: test@datainsight.com
 Password: password123
@@ -446,11 +475,12 @@ Or create new account at `/register`
 
 ## 🚀 Next Steps
 
-1. **Explore Labs:** Navigate to `/LABS` to see all 11 laboratory implementations
+1. **Explore Labs:** Navigate to `/LABS` to see all 12 laboratory implementations
 2. **Upload Data:** Try uploading a CSV file at `/upload`
 3. **Create Dashboard:** Build your first dashboard with charts
-4. **Review Code:** Check `labs_api/` for backend MVC implementation
-5. **Read Labs Documentation:** Each lab has detailed explanations in `/LABS/lab[1-11]`
+4. **Review Code:** Check `src/server/` for backend architecture (MVC + DI + Cache)
+5. **Read Labs Documentation:** Each lab has detailed explanations in `/LABS/lab[1-12]`
+6. **Run Tests:** Execute `npm test` to verify all 54 tests pass
 
 ---
 
@@ -473,5 +503,3 @@ If you encounter issues:
 - **Database:** Backup database before running migration scripts
 - **Ports:** Default ports are 3000 (frontend) and 4000 (backend)
 - **Logs:** Check console output for detailed error information
-
-**Happy coding! 🎉**

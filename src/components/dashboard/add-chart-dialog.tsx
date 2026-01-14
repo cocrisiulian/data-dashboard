@@ -237,7 +237,7 @@ export function AddChartDialog({ dashboardId, files, onChartAdded }: { dashboard
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || files.length === 0 || !fileId || (fileId && (!xAxis || !yAxis))}>
+            <Button type="submit" disabled={loading || files.length === 0 || !fileId || Boolean(fileId && (!xAxis || !yAxis))}>
               {loading ? "Adding..." : "Add Chart"}
             </Button>
           </DialogFooter>

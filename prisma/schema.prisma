@@ -34,6 +34,7 @@ model User {
   password        String    // hashed with bcrypt
   fullName        String?   @map("full_name")
   planId          String?   @map("plan_id")
+  isAdmin         Boolean   @default(false) @map("is_admin")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -41,6 +42,7 @@ model User {
   dashboards      Dashboard[]
   files           File[]
   usageLogs       UsageLog[]
+  activityLogs    ActivityLog[]
 
   @@map("users")
 }
@@ -53,11 +55,13 @@ model File {
   fileSize        Int      @map("file_size")
   fileType        String   @map("file_type")
   uploadedAt      DateTime @default(now()) @map("uploaded_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   charts          Chart[]
 
   @@index([userId])
+  @@index([deletedAt])
   @@map("files")
 }
 
@@ -68,11 +72,13 @@ model Dashboard {
   description     String?  @db.Text
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   charts          Chart[]
 
   @@index([userId])
+  @@index([deletedAt])
   @@map("dashboards")
 }
 
@@ -84,11 +90,13 @@ model Chart {
   chartConfig     Json     @map("chart_config")
   title           String
   createdAt       DateTime @default(now()) @map("created_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   dashboard       Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
   file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
 
   @@index([dashboardId])
+  @@index([deletedAt])
   @@map("charts")
 }
 
@@ -104,4 +112,22 @@ model UsageLog {
   @@index([userId])
   @@index([createdAt])
   @@map("usage_logs")
+}
+
+model ActivityLog {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  action          String   // "create", "update", "delete", "login", "logout", etc.
+  entity          String   // "Plan", "File", "Dashboard", "Chart", "User"
+  entityId        String?  @map("entity_id")
+  metadata        Json?    // Additional context (e.g., {fileName: "data.csv", size: 1024})
+  level           String   @default("INFO") // "INFO", "WARN", "ERROR"
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([level])
+  @@map("activity_logs")
 }

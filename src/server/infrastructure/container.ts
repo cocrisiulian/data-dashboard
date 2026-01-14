@@ -14,13 +14,14 @@
  * - Testability (easy mocking pentru unit tests)
  */
 
-import { createContainer, asClass, InjectionMode, AwilixContainer } from 'awilix';
+import { createContainer, asClass, asValue, asFunction, InjectionMode, AwilixContainer } from 'awilix';
 
 // Services
 import { PlanService } from '../services/PlanService';
 import { FileService } from '../services/FileService';
 import { ChartService } from '../services/ChartService';
 import { DashboardService } from '../services/DashboardService';
+import { AdminStatsService } from '../services/AdminStatsService';
 
 // Repositories
 import { PlanRepository } from '../repositories/PlanRepository';
@@ -28,6 +29,7 @@ import { FileRepository } from '../repositories/FileRepository';
 import { ChartRepository } from '../repositories/ChartRepository';
 import { DashboardRepository } from '../repositories/DashboardRepository';
 import { UserRepository } from '../repositories/UserRepository';
+import { AdminStatsRepository } from '../repositories/AdminStatsRepository';
 
 // Controllers
 import { PlanController } from '../controllers/PlanController';
@@ -38,6 +40,8 @@ import { DashboardController } from '../controllers/DashboardController';
 // Infrastructure
 import { MemoryCacheService } from './cache/MemoryCacheService';
 import { ICache } from './cache/ICache';
+import { createLogger } from './logger';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Create și configure DI container
@@ -63,15 +67,22 @@ export function createDIContainer(): AwilixContainer {
     fileRepository: asClass(FileRepository).singleton(),
     chartRepository: asClass(ChartRepository).singleton(),
     dashboardRepository: asClass(DashboardRepository).singleton(),
-    userRepository: asClass(UserRepository).singleton()
+    userRepository: asClass(UserRepository).singleton(),
+    adminStatsRepository: asClass(AdminStatsRepository).singleton()
   });
 
   // ========================================
   // INFRASTRUCTURE (SINGLETON)
   // ========================================
   // Cache service - singleton pentru shared cache între toate requesturile
+  // Logger - singleton cu Prisma client pentru database logging
+  // Prisma Client - singleton pentru connection pooling
+
+  const prisma = new PrismaClient();
 
   container.register({
+    prisma: asValue(prisma),
+    logger: asFunction(() => createLogger('DataInsight', prisma)).singleton(),
     cacheManager: asClass(MemoryCacheService).singleton()
   });
 
@@ -85,7 +96,8 @@ export function createDIContainer(): AwilixContainer {
     planService: asClass(PlanService).singleton(),
     fileService: asClass(FileService).singleton(),
     chartService: asClass(ChartService).singleton(),
-    dashboardService: asClass(DashboardService).singleton()
+    dashboardService: asClass(DashboardService).singleton(),
+    adminStatsService: asClass(AdminStatsService).singleton()
   });
 
   // ========================================

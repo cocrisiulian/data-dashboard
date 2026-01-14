@@ -2,9 +2,17 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/controls/button"
-import { BarChart3, Upload, LayoutDashboard, CreditCard, LogOut, BookOpen, User } from "lucide-react"
+import { BarChart3, Upload, LayoutDashboard, CreditCard, LogOut, BookOpen, User, Shield, Trash2, Users, Settings, Activity } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/navigation/dropdown-menu"
 
 export function DashboardNav() {
   const { user, logout } = useAuth()
@@ -42,12 +50,58 @@ export function DashboardNav() {
                 Pricing
               </Button>
             </Link>
+            <Link href="/trash" className="px-2">
+              <Button variant="ghost" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Trash
+              </Button>
+            </Link>
             <Link href="/LABS" className="px-2">
               <Button variant="ghost" size="sm">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Labs
               </Button>
             </Link>
+            {user?.isAdmin && (
+              <div className="px-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="backdrop-blur-md bg-white/95 dark:bg-slate-900/95 border-2 shadow-xl">
+                    <DropdownMenuLabel className="font-semibold">Admin Panel</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/analytics" className="cursor-pointer">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Analytics
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/users" className="cursor-pointer">
+                        <Users className="h-4 w-4 mr-2" />
+                        User Management
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/plans" className="cursor-pointer">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Plan Management
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/logs" className="cursor-pointer">
+                        <Activity className="h-4 w-4 mr-2" />
+                        Activity Logs
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             <Link href="/profile" className="pl-2">
               <Button variant="ghost" size="sm">
                 <User className="h-4 w-4 mr-2" />

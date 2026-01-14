@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/layout/card"
 import { Button } from "@/components/ui/controls/button"
-import { Check } from "lucide-react"
+import { Check, Crown } from "lucide-react"
 import { api } from "@/lib/api/client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -11,12 +11,14 @@ import type { Plan } from "@/lib/types/database"
 import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils/utils"
 import { ResourceCleanupModal } from "@/components/ui/modals/resource-cleanup-modal"
+import { Badge } from "@/components/ui/text/badge"
 
 export function PricingCard({
   plan,
   currentPlanId,
   isLoggedIn,
-}: { plan: Plan; currentPlanId?: string | null; isLoggedIn: boolean }) {
+  isAdminUser = false,
+}: { plan: Plan; currentPlanId?: string | null; isLoggedIn: boolean; isAdminUser?: boolean }) {
   const router = useRouter()
   const { refreshUser, user } = useAuth()
   const [loading, setLoading] = useState(false)
@@ -132,6 +134,16 @@ export function PricingCard({
         isPro ? "border-primary ring-1 ring-primary/40 shadow-lg bg-gradient-to-b from-primary/5 to-transparent" : "hover:border-foreground/20"
       }`}
     >
+      {/* Most Popular Badge */}
+      {plan.isPopular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+          <Badge className="bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold flex items-center gap-1 shadow-lg">
+            <Crown className="h-3 w-3" />
+            Most Popular
+          </Badge>
+        </div>
+      )}
+      
       <CardHeader>
         <CardTitle className="text-2xl tracking-tight">{plan.name}</CardTitle>
         <CardDescription className="text-sm">
@@ -165,9 +177,18 @@ export function PricingCard({
           className={cn("w-full", isPro && !isCurrentUserPlan && "border border-border")}
           variant={isPro ? "default" : "outline"}
           onClick={handleUpgrade}
-          disabled={isCurrentUserPlan || loading}
+          disabled={isCurrentUserPlan || loading || isAdminUser}
+          title={isAdminUser ? "Plan selection is disabled for admin accounts" : undefined}
         >
-          {isCurrentUserPlan ? "Current Plan" : loading ? "Processing..." : isLoggedIn ? "Upgrade" : "Get Started"}
+          {isAdminUser 
+            ? "Admin - Unlimited Access" 
+            : isCurrentUserPlan 
+              ? "Current Plan" 
+              : loading 
+                ? "Processing..." 
+                : isLoggedIn 
+                  ? "Upgrade" 
+                  : "Get Started"}
         </Button>
       </CardFooter>
 

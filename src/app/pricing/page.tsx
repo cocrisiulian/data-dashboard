@@ -22,7 +22,9 @@ export default function PricingPage() {
       setIsLoading(true)
       setError(null)
       const data = await api.plans.getAll()
-      setPlans(data)
+      // Filter out Admin plan - only for internal use
+      const publicPlans = data.filter((plan: any) => plan.name !== 'Admin')
+      setPlans(publicPlans)
     } catch (error) {
       console.error("Failed to load plans:", error)
       setError(error instanceof Error ? error.message : "Failed to load plans")
@@ -49,6 +51,13 @@ export default function PricingPage() {
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Select the perfect plan for your data visualization needs. Upgrade or downgrade at any time.
             </p>
+            {user?.isAdmin && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg max-w-2xl mx-auto">
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  <strong>Admin Account:</strong> You have unlimited access to all features. Plan selection is disabled for admin accounts.
+                </p>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -59,7 +68,13 @@ export default function PricingPage() {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
             {plans.map((plan) => (
-              <PricingCard key={plan.id} plan={plan} currentPlanId={user?.plan_id} isLoggedIn={!!user} />
+              <PricingCard
+                key={plan.id}
+                plan={plan}
+                currentPlanId={user?.plan?.id}
+                isLoggedIn={!!user}
+                isAdminUser={user?.isAdmin || false}
+              />
             ))}
           </div>
 
